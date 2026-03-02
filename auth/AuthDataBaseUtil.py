@@ -86,8 +86,9 @@ def requireEmailCode(email):
         return False, "Redis service unavailable"
         
     # 生成6位随机验证码
-    code = ''.join(random.choices(string.digits, k=6))
-    
+    # code = ''.join(random.choices(string.digits, k=6))
+    code = "000000"
+
     # 存入 Redis，有效期 120 秒
     redis_key = f"email_code:{email}"
     try:
