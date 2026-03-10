@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token
 from auth.AuthDataBaseUtil import login, register, requireEmailCode
 from database.models import User
 
@@ -15,7 +16,13 @@ def login_route():
 
     user = login(user_id, password)
     if user:
-        return jsonify({'status': 'success', 'msg': 'Login successful', 'user': {'id': user.id, 'email': user.email}})
+        access_token = create_access_token(identity=user.id)
+        return jsonify({
+            'status': 'success',
+            'msg': 'Login successful',
+            'user': {'id': user.id, 'email': user.email},
+            'token': access_token
+        })
     else:
         return jsonify({'status': 'fail', 'msg': 'Invalid id or password'}), 401
 
