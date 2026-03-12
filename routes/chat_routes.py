@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response, stream_with_context
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database.dbUtil import getWindowHistory, getChatHistory, creatChatWindow, addChatMessage
+from util.chat import getChatResponse
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -57,3 +58,21 @@ def send_message():
         return jsonify({'status': 'success', 'msg': 'Message sent'})
     else:
         return jsonify({'status': 'fail', 'msg': 'Failed to save message'}), 500
+
+
+@chat_bp.route('/stream', methods=['POST'])
+@jwt_required()
+def chat_stream():
+    data = request.get_json()
+    window_id = data.get('windowID')
+    content = data.get('content')
+    current_user_id = get_jwt_identity()
+
+    if not window_id or not content:
+        return jsonify({'status': 'fail', 'msg': 'Missing parameters'}), 400
+
+    # Generator for streaming response
+    # Using stream_with_context to keep the request context active for DB operations
+    generator = getChatResponse(current_user_id, window_id, content)
+    
+    return Response(stream_with_context(generator), mimetype='text/plain')
