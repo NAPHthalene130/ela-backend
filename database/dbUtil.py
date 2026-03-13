@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from database.extensions import db
-from database.models import UserChatWindowTable, WindowChatNode
+from database.models import UserChatWindowTable, WindowChatNode, CrourseNode
 
 
 def creatChatWindow(userID):
@@ -81,4 +81,12 @@ def deleteUserChatWindow(windowId):
     except Exception:
         db.session.rollback()
         return False
+
+
+def getCourseList():
+    try:
+        courses = CrourseNode.query.all()
+        return [course.courseName for course in courses]
+    except Exception:
+        return []
 
