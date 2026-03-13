@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from database.extensions import db
-from database.models import User
+from database.models import User, UserChatWindowTable, WindowChatNode, CrourseNode
 from routes.auth_routes import auth_bp
 from routes.chat_routes import chat_bp
 from project_config import JWT_SECRET_KEY

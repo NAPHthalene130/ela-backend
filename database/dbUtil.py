@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from sqlalchemy import inspect, text
+
 from database.extensions import db
 from database.models import UserChatWindowTable, WindowChatNode, CrourseNode
 
@@ -88,11 +90,18 @@ def getCourseList():
         courses = CrourseNode.query.all()
         course_list = []
         for course in courses:
-            # Keep compatibility with possible legacy field name.
             course_name = getattr(course, 'courseName', None) or getattr(course, 'course', None)
             if course_name:
                 course_list.append(course_name)
         return course_list
     except Exception:
-        return []
+        try:
+            columns = {column["name"] for column in inspect(db.engine).get_columns('courseTable')}
+            target_column = 'course' if 'course' in columns else 'courseName' if 'courseName' in columns else None
+            if not target_column:
+                return []
+            rows = db.session.execute(text(f'SELECT "{target_column}" FROM "courseTable"')).all()
+            return [row[0] for row in rows if row and row[0]]
+        except Exception:
+            return []
 
