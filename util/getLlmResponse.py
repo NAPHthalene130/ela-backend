@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from chat_config import API_KEY, BASE_URL, MODEL
+from project_config import API_KEY, BASE_URL, MODEL
 
 
 def _extract_text_from_response(response) -> str:

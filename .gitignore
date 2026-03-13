@@ -2,3 +2,4 @@
 .idea
 __pycache__
 chat_config.py
+project_config.py

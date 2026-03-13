@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, Response, stream_with_context
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from database.dbUtil import getWindowHistory, getChatHistory, creatChatWindow, addChatMessage
+from database.dbUtil import getWindowHistory, getChatHistory, creatChatWindow, addChatMessage, deleteUserChatWindow
+from database.models import UserChatWindowTable
 from util.chat import getChatResponse
 
 chat_bp = Blueprint('chat', __name__)
@@ -76,3 +77,27 @@ def chat_stream():
     generator = getChatResponse(current_user_id, window_id, content)
     
     return Response(stream_with_context(generator), mimetype='text/plain')
+
+
+@chat_bp.route('/delete-window', methods=['POST'])
+@jwt_required()
+def delete_window():
+    data = request.get_json()
+    user_id = data.get('userID')
+    window_id = data.get('windowID')
+    current_user_id = get_jwt_identity()
+
+    if not user_id or not window_id:
+        return jsonify({'status': 'fail', 'msg': 'Missing parameters'}), 400
+
+    if user_id != current_user_id:
+        return jsonify({'status': 'fail', 'msg': 'Unauthorized user'}), 403
+
+    target_window = UserChatWindowTable.query.filter_by(id=current_user_id, windowsId=window_id).first()
+    if not target_window:
+        return jsonify({'status': 'fail', 'msg': 'Window not found'}), 404
+
+    success = deleteUserChatWindow(window_id)
+    if success:
+        return jsonify({'status': 'success', 'msg': 'Window deleted'})
+    return jsonify({'status': 'fail', 'msg': 'Failed to delete window'}), 500

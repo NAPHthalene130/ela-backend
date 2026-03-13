@@ -71,3 +71,14 @@ def getWindowHistory(userID):
     except Exception:
         return []
 
+
+def deleteUserChatWindow(windowId):
+    try:
+        WindowChatNode.query.filter_by(windowID=windowId).delete()
+        UserChatWindowTable.query.filter_by(windowsId=windowId).delete()
+        db.session.commit()
+        return True
+    except Exception:
+        db.session.rollback()
+        return False
+

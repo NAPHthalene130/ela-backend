@@ -5,12 +5,13 @@ from database.extensions import db
 from database.models import User
 from routes.auth_routes import auth_bp
 from routes.chat_routes import chat_bp
+from project_config import JWT_SECRET_KEY
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///project.db'
-app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this!
+app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
 
 jwt = JWTManager(app)
 
