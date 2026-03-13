@@ -1,10 +1,19 @@
 from flask import Blueprint, request, jsonify, Response, stream_with_context
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from database.dbUtil import getWindowHistory, getChatHistory, creatChatWindow, addChatMessage, deleteUserChatWindow
+from database.dbUtil import getWindowHistory, getChatHistory, creatChatWindow, addChatMessage, deleteUserChatWindow, getCourseList
 from database.models import UserChatWindowTable
 from util.chat import getChatResponse
 
 chat_bp = Blueprint('chat', __name__)
+
+
+@chat_bp.route('/courses', methods=['GET'])
+@jwt_required()
+def get_courses():
+    return jsonify({
+        'status': 'success',
+        'data': getCourseList()
+    })
 
 @chat_bp.route('/windows', methods=['GET'])
 @jwt_required()
@@ -67,6 +76,7 @@ def chat_stream():
     data = request.get_json()
     window_id = data.get('windowID')
     content = data.get('content')
+    course = data.get('course')
     current_user_id = get_jwt_identity()
 
     if not window_id or not content:
@@ -74,7 +84,7 @@ def chat_stream():
 
     # Generator for streaming response
     # Using stream_with_context to keep the request context active for DB operations
-    generator = getChatResponse(current_user_id, window_id, content)
+    generator = getChatResponse(current_user_id, window_id, content, course)
     
     return Response(stream_with_context(generator), mimetype='text/plain')
 

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from util.getLlmResponse import getLlmRes_stream
 
 
-def getChatResponse(userId: str, chatWindowID: str, message: str):
+def getChatResponse(userId: str, chatWindowID: str, message: str, course: str = ""):
     # 1. Save User Message to Database
     user_msg = WindowChatNode(
         windowID=chatWindowID,
@@ -21,7 +21,7 @@ def getChatResponse(userId: str, chatWindowID: str, message: str):
         # Continue to generation even if save fails? Or return error?
         # Assuming we continue or at least try.
 
-    prompt = f"请返回以下内容:userId={userId}\nchatWindowID={chatWindowID}"
+    prompt = f"请返回以下内容:userId={userId}\nchatWindowID={chatWindowID}\ncourse={course or ''}"
     
     # 2. Generator for Streaming Response
     def generate():

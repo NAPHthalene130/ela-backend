@@ -86,7 +86,13 @@ def deleteUserChatWindow(windowId):
 def getCourseList():
     try:
         courses = CrourseNode.query.all()
-        return [course.courseName for course in courses]
+        course_list = []
+        for course in courses:
+            # Keep compatibility with possible legacy field name.
+            course_name = getattr(course, 'courseName', None) or getattr(course, 'course', None)
+            if course_name:
+                course_list.append(course_name)
+        return course_list
     except Exception:
         return []
 
