@@ -22,3 +22,8 @@ class WindowChatNode(db.Model):
     content = db.Column(db.String(102400), nullable=False)
     isUserSend = db.Column(db.Boolean, nullable=False)
     sendTime = db.Column(db.String(64), nullable=False)
+
+
+class CourseTabel(db.Model):
+    __tablename__ = 'courseTabel'
+    couse = db.Column(db.String(1024), primary_key=True)
