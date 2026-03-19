@@ -1,5 +1,7 @@
 .venv
 .idea
 __pycache__
-chat_config.py
 project_config.py
+project.db
+instance/
+localApp/questionProcess/cqFiles/*
