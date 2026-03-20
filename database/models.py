@@ -49,7 +49,7 @@ class CrourseNode(db.Model):
     __tablename__ = "courseTable"
     course = db.Column(db.String(1024), primary_key=True)
 
-
+#选择题类
 class CQNode(db.Model):
     __tablename__ = "choiceQuestionTable"
 
@@ -64,6 +64,88 @@ class CQNode(db.Model):
     brief = db.Column(db.String(1024), nullable=True, default="")
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
+
+
+# 小组表
+class StudentGroup(db.Model):
+    __tablename__ = "student_group"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(1024), nullable=False)
+    teacher_id = db.Column(
+        db.String(50),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+
+# 小组成员表
+class StudentGroupMember(db.Model):
+    __tablename__ = "student_group_member"
+
+    group_id = db.Column(
+        db.Integer,
+        db.ForeignKey("student_group.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    student_id = db.Column(
+        db.String(50),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+
+# 题单表
+class QuestionSet(db.Model):
+    __tablename__ = "question_set"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(1024), nullable=False)
+    teacher_id = db.Column(
+        db.String(50),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+
+# 题单题目关联表
+class QuestionSetQuestion(db.Model):
+    __tablename__ = "question_set_question"
+
+    set_id = db.Column(
+        db.Integer,
+        db.ForeignKey("question_set.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    question_id = db.Column(
+        db.Integer,
+        db.ForeignKey("choiceQuestionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    order_num = db.Column(db.Integer, nullable=False, default=0)
+
+
+# 题单下发表
+class QuestionSetAssignment(db.Model):
+    __tablename__ = "question_set_assignment"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    set_id = db.Column(
+        db.Integer,
+        db.ForeignKey("question_set.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    group_id = db.Column(
+        db.Integer,
+        db.ForeignKey("student_group.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    begin_time = db.Column(db.DateTime, nullable=True)
+    end_time = db.Column(db.DateTime, nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint("set_id", "group_id", name="uq_set_group"),
+    )
 
 
 def init_all_tables(app):
