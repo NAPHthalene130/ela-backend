@@ -6,7 +6,7 @@ USER_TYPES = ("student", "teacher")
 
 
 class User(db.Model):
-    __tablename__ = "users"
+    __tablename__ = "usersTable"
     __table_args__ = (
         db.CheckConstraint("type IN ('student', 'teacher')", name="ck_users_type"),
     )
@@ -25,14 +25,14 @@ class User(db.Model):
 class UserChatWindowTable(db.Model):
     __tablename__ = "userChatWindowTable"
 
-    id = db.Column(db.String(50), db.ForeignKey("users.id"), nullable=False)
+    id = db.Column(db.String(50), db.ForeignKey("usersTable.id"), nullable=False)
     windowsId = db.Column(db.String(256), primary_key=True)
     title = db.Column(db.String(1024), nullable=False, default="新对话")
     createTime = db.Column(db.String(64), nullable=False)
 
 
 class WindowChatNode(db.Model):
-    __tablename__ = "WindowChatTable"
+    __tablename__ = "windowChatTable"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     windowID = db.Column(
@@ -48,6 +48,12 @@ class WindowChatNode(db.Model):
 class CrourseNode(db.Model):
     __tablename__ = "courseTable"
     course = db.Column(db.String(1024), primary_key=True)
+
+
+class QuestionNode(db.Model):
+    __tablename__ = "questionTable"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.String(1024), nullable=True, default="UnKnown")
 
 #选择题类
 class CQNode(db.Model):
@@ -68,53 +74,53 @@ class CQNode(db.Model):
 
 # 小组表
 class StudentGroup(db.Model):
-    __tablename__ = "student_group"
+    __tablename__ = "studentGroupTable"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(1024), nullable=False)
     teacher_id = db.Column(
         db.String(50),
-        db.ForeignKey("users.id", ondelete="CASCADE"),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
         nullable=False,
     )
 
 
 # 小组成员表
 class StudentGroupMember(db.Model):
-    __tablename__ = "student_group_member"
+    __tablename__ = "studentGroupMemberTable"
 
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("student_group.id", ondelete="CASCADE"),
+        db.ForeignKey("studentGroupTable.id", ondelete="CASCADE"),
         primary_key=True,
     )
     student_id = db.Column(
         db.String(50),
-        db.ForeignKey("users.id", ondelete="CASCADE"),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
         primary_key=True,
     )
 
 
 # 题单表
 class QuestionSet(db.Model):
-    __tablename__ = "question_set"
+    __tablename__ = "questionSetTable"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(1024), nullable=False)
     teacher_id = db.Column(
         db.String(50),
-        db.ForeignKey("users.id", ondelete="CASCADE"),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
         nullable=False,
     )
 
 
 # 题单题目关联表
 class QuestionSetQuestion(db.Model):
-    __tablename__ = "question_set_question"
+    __tablename__ = "questionSetQuestionTable"
 
     set_id = db.Column(
         db.Integer,
-        db.ForeignKey("question_set.id", ondelete="CASCADE"),
+        db.ForeignKey("questionSetTable.id", ondelete="CASCADE"),
         primary_key=True,
     )
     question_id = db.Column(
@@ -127,17 +133,17 @@ class QuestionSetQuestion(db.Model):
 
 # 题单下发表
 class QuestionSetAssignment(db.Model):
-    __tablename__ = "question_set_assignment"
+    __tablename__ = "questionSetAssignmentTable"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     set_id = db.Column(
         db.Integer,
-        db.ForeignKey("question_set.id", ondelete="CASCADE"),
+        db.ForeignKey("questionSetTable.id", ondelete="CASCADE"),
         nullable=False,
     )
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("student_group.id", ondelete="CASCADE"),
+        db.ForeignKey("studentGroupTable.id", ondelete="CASCADE"),
         nullable=False,
     )
     begin_time = db.Column(db.DateTime, nullable=True)
@@ -156,14 +162,14 @@ def init_all_tables(app):
 
 def ensure_user_type_schema():
     inspector = inspect(db.engine)
-    if "users" not in inspector.get_table_names():
+    if "usersTable" not in inspector.get_table_names():
         return
 
-    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    user_columns = {column["name"] for column in inspector.get_columns("usersTable")}
     if "type" not in user_columns:
         db.session.execute(
             text(
-                "ALTER TABLE users "
+                "ALTER TABLE usersTable "
                 "ADD COLUMN type VARCHAR(16) NOT NULL DEFAULT 'student'"
             )
         )
@@ -171,7 +177,7 @@ def ensure_user_type_schema():
 
     db.session.execute(
         text(
-            "UPDATE users "
+            "UPDATE usersTable "
             "SET type = 'student' "
             "WHERE type IS NULL OR type NOT IN ('student', 'teacher')"
         )
@@ -180,7 +186,7 @@ def ensure_user_type_schema():
         text(
             """
             CREATE TRIGGER IF NOT EXISTS users_type_insert_check
-            BEFORE INSERT ON users
+            BEFORE INSERT ON usersTable
             FOR EACH ROW
             WHEN NEW.type IS NULL OR NEW.type NOT IN ('student', 'teacher')
             BEGIN
@@ -193,7 +199,7 @@ def ensure_user_type_schema():
         text(
             """
             CREATE TRIGGER IF NOT EXISTS users_type_update_check
-            BEFORE UPDATE OF type ON users
+            BEFORE UPDATE OF type ON usersTable
             FOR EACH ROW
             WHEN NEW.type IS NULL OR NEW.type NOT IN ('student', 'teacher')
             BEGIN

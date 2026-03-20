@@ -1,11 +1,13 @@
 from core.extensions import db
-from database.models import CQNode
+from database.models import CQNode, QuestionNode
 
 
 def add_cq_node(cq_node: CQNode) -> bool:
     try:
-        cq_count = CQNode.query.count()
-        cq_node.id = cq_count + 1
+        question_node = QuestionNode(type="choiceQuestion")
+        db.session.add(question_node)
+        db.session.flush()
+        cq_node.id = question_node.id
         db.session.add(cq_node)
         db.session.commit()
         return True
