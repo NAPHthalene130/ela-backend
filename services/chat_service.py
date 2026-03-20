@@ -7,7 +7,7 @@ from repositories.chat_repository import (
     save_chat_message,
 )
 from repositories.course_repository import get_course_list as fetch_course_list
-from util.getLlmResponse import getLlmRes_stream, iter_stream_text
+from util.getLlmResponse import getLlmRes
 
 
 def get_course_list() -> list[str]:
@@ -46,13 +46,9 @@ def stream_chat_response(user_id: str, chat_window_id: str, message: str, course
     prompt = f"请返回以下内容:userId={user_id}\nchatWindowID={chat_window_id}\ncourse={course or ''}"
 
     def generate():
-        chunks = []
         try:
-            stream = getLlmRes_stream(message, prompt)
-            for chunk in iter_stream_text(stream):
-                chunks.append(chunk)
-                yield chunk
-            full_content = "".join(chunks)
+            full_content = getLlmRes(message, prompt)
+            yield full_content
             save_chat_message(chat_window_id, full_content, False)
         except Exception as exc:
             yield f"\n[System Error: {exc}]"

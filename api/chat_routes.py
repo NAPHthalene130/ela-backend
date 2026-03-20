@@ -88,13 +88,10 @@ def chat_stream():
 def delete_window():
     """删除会话接口：校验归属后删除窗口及消息。"""
     data = request.get_json(silent=True) or {}
-    user_id = data.get("userID")
     window_id = data.get("windowID")
     current_user_id = get_jwt_identity()
-    if not user_id or not window_id:
+    if not window_id:
         return fail_response("Missing parameters", 400)
-    if user_id != current_user_id:
-        return fail_response("Unauthorized user", 403)
 
     success, status_code, message = delete_window_for_user(current_user_id, window_id)
     if not success:

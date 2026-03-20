@@ -25,6 +25,18 @@ def login_user(user_id: str, password: str) -> User | None:
     return None
 
 
+def get_user_profile(user_id: str) -> User | None:
+    return get_user_by_id(user_id)
+
+
+def serialize_user(user: User) -> dict:
+    return {
+        "id": user.id,
+        "email": user.email,
+        "type": normalize_user_type(user.type),
+    }
+
+
 def check_user_id_exists(user_id: str) -> bool:
     return get_user_by_id(user_id) is not None
 

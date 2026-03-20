@@ -43,35 +43,11 @@ def _load_llm_config():
         raise RuntimeError("缺少大模型配置，请提供 project_config.py 或环境变量。")
 
 
-def getLlmRes_NoStream(msg: str, prompt: str) -> str:
+def getLlmRes(msg: str, prompt: str) -> str:
     api_key, base_url, model = _load_llm_config()
     client = OpenAI(base_url=base_url, api_key=api_key)
     response = client.chat.completions.create(
         model=model,
         messages=_build_messages(msg, prompt),
-        stream=False,
     )
     return _extract_text_from_chat_response(response)
-
-
-def getLlmRes_stream(msg: str, prompt: str):
-    api_key, base_url, model = _load_llm_config()
-    client = OpenAI(base_url=base_url, api_key=api_key)
-    return client.chat.completions.create(
-        model=model,
-        messages=_build_messages(msg, prompt),
-        stream=True,
-    )
-
-
-def iter_stream_text(stream):
-    for chunk in stream:
-        choices = getattr(chunk, "choices", None) or []
-        if not choices:
-            continue
-        delta = getattr(choices[0], "delta", None)
-        if not delta:
-            continue
-        text = getattr(delta, "content", None)
-        if text:
-            yield text

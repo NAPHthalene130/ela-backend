@@ -1,13 +1,15 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 from core.responses import fail_response, success_response
 from services.auth_service import (
     check_user_id_exists,
+    get_user_profile,
     login_user,
     normalize_user_type,
     register_user,
     require_email_code,
+    serialize_user,
 )
 
 auth_bp = Blueprint("auth", __name__)
@@ -31,8 +33,26 @@ def login_route():
         {
             "status": "success",
             "msg": "Login successful",
-            "user": {"id": user.id, "email": user.email, "type": user.type},
+            "user": serialize_user(user),
             "token": token,
+        }
+    )
+
+
+@auth_bp.get("/me")
+@jwt_required()
+def me_route():
+    """返回当前 JWT 对应的用户信息，供前端恢复会话。"""
+    current_user_id = get_jwt_identity()
+    user = get_user_profile(current_user_id)
+    if not user:
+        return fail_response("User not found", 404)
+
+    return jsonify(
+        {
+            "status": "success",
+            "msg": "Session valid",
+            "user": serialize_user(user),
         }
     )
 

@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 
 try:
@@ -13,5 +14,8 @@ class AppConfig:
         PROJECT_JWT_SECRET_KEY
         or os.getenv("ELA_JWT_SECRET_KEY")
         or "dev-jwt-secret-change-me"
+    )
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        days=int(os.getenv("ELA_JWT_ACCESS_TOKEN_EXPIRES_DAYS", "7"))
     )
     JSON_AS_ASCII = False
