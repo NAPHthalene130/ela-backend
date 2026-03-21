@@ -22,3 +22,15 @@ def add_student_group_member(group_id: int, student_id: str) -> bool:
     except Exception:
         db.session.rollback()
         return False
+
+
+def get_group_info_from_studentGroupTable(teacherID: str) -> list[dict]:
+    try:
+        groups = (
+            StudentGroup.query.filter_by(teacher_id=teacherID)
+            .order_by(StudentGroup.id.asc())
+            .all()
+        )
+        return [{"id": group.id, "name": group.name} for group in groups]
+    except Exception:
+        return []

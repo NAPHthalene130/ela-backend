@@ -9,6 +9,7 @@ from repositories.chat_repository import (
 )
 from repositories.course_repository import get_course_list
 from repositories.cq_repository import add_cq_node, update_cq_node
+from repositories.group_repository import get_group_info_from_studentGroupTable
 
 __all__ = [
     "get_user_by_id",
@@ -20,6 +21,7 @@ __all__ = [
     "delete_user_chat_window",
     "is_window_owned_by_user",
     "get_course_list",
+    "get_group_info_from_studentGroupTable",
     "add_cq_node",
     "update_cq_node",
 ]
