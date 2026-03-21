@@ -4,7 +4,7 @@ from database.models import CQNode, QuestionNode
 
 def add_cq_node(cq_node: CQNode) -> bool:
     try:
-        question_node = QuestionNode(type="choiceQuestion")
+        question_node = QuestionNode(type="choice", course=cq_node.course)
         db.session.add(question_node)
         db.session.flush()
         cq_node.id = question_node.id

@@ -49,29 +49,6 @@ class CrourseNode(db.Model):
     __tablename__ = "courseTable"
     course = db.Column(db.String(1024), primary_key=True)
 
-
-class QuestionNode(db.Model):
-    __tablename__ = "questionTable"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    type = db.Column(db.String(1024), nullable=True, default="UnKnown")
-
-#选择题类
-class CQNode(db.Model):
-    __tablename__ = "choiceQuestionTable"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    course = db.Column(db.String(1024), nullable=True, default="")
-    content = db.Column(db.String(1024), nullable=False)
-    optionA = db.Column(db.String(1024), nullable=True, default="")
-    optionB = db.Column(db.String(1024), nullable=True, default="")
-    optionC = db.Column(db.String(1024), nullable=True, default="")
-    optionD = db.Column(db.String(1024), nullable=True, default="")
-    answer = db.Column(db.String(16), nullable=True, default="")
-    brief = db.Column(db.String(1024), nullable=True, default="")
-    explanation = db.Column(db.String(4096), nullable=True, default="")
-    difficulty = db.Column(db.Integer, nullable=False, default=0)
-
-
 # 小组表
 class StudentGroup(db.Model):
     __tablename__ = "studentGroupTable"
@@ -100,6 +77,81 @@ class StudentGroupMember(db.Model):
         primary_key=True,
     )
 
+#题目类
+class QuestionNode(db.Model):
+    __tablename__ = "questionTable"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    type = db.Column(db.String(1024), nullable=True, default="UnKnown")
+    course = db.Column(db.String(1024), nullable=True, default="UnKnown")
+
+#选择题类
+class ChoiceQuestionNode(db.Model):
+    __tablename__ = "choiceQuestionTable"
+
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    course = db.Column(db.String(1024), nullable=True, default="")
+    content = db.Column(db.String(1024), nullable=False)
+    optionA = db.Column(db.String(1024), nullable=True, default="")
+    optionB = db.Column(db.String(1024), nullable=True, default="")
+    optionC = db.Column(db.String(1024), nullable=True, default="")
+    optionD = db.Column(db.String(1024), nullable=True, default="")
+    answer = db.Column(db.String(16), nullable=True, default="")
+    brief = db.Column(db.String(1024), nullable=True, default="")
+    explanation = db.Column(db.String(4096), nullable=True, default="")
+    difficulty = db.Column(db.Integer, nullable=False, default=0)
+
+#填空题类
+class FillQuestionNode(db.Model):
+    __tablename__ = "fillQuestionTable"
+
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    course = db.Column(db.String(1024), nullable=True, default="")
+    content = db.Column(db.String(1024), nullable=False)
+    answer = db.Column(db.String(1024), nullable=True, default="")
+    brief = db.Column(db.String(1024), nullable=True, default="")
+    explanation = db.Column(db.String(4096), nullable=True, default="")
+    difficulty = db.Column(db.Integer, nullable=False, default=0)
+
+
+class SubjectiveQuestionNode(db.Model):
+    __tablename__ = "subjectiveQuestionTable"
+
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    course = db.Column(db.String(1024), nullable=True, default="")
+    content = db.Column(db.String(1024), nullable=False)
+    answer = db.Column(db.String(1024), nullable=True, default="")
+    brief = db.Column(db.String(1024), nullable=True, default="")
+    explanation = db.Column(db.String(4096), nullable=True, default="")
+    difficulty = db.Column(db.Integer, nullable=False, default=0)
+
+
+class CustomQuestionNode(db.Model):
+    __tablename__ = "customQuestionTable"
+
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    course = db.Column(db.String(1024), nullable=True, default="")
+    imageURL = db.Column(db.String(2048), nullable=True, default="")
+
+
+CQNode = ChoiceQuestionNode
+FQNode = FillQuestionNode
+    
 
 # 题单表
 class QuestionSet(db.Model):
@@ -125,7 +177,7 @@ class QuestionSetQuestion(db.Model):
     )
     question_id = db.Column(
         db.Integer,
-        db.ForeignKey("choiceQuestionTable.id", ondelete="CASCADE"),
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
         primary_key=True,
     )
     order_num = db.Column(db.Integer, nullable=False, default=0)

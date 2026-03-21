@@ -1,51 +1,82 @@
-from datetime import datetime
-
 from core.extensions import db
-from database.models import QuestionSet, QuestionSetAssignment, QuestionSetQuestion
+from database.models import (
+    ChoiceQuestionNode,
+    CustomQuestionNode,
+    FillQuestionNode,
+    QuestionNode,
+    SubjectiveQuestionNode,
+)
 
 
-def add_question_set(name: str, teacher_id: str) -> int | None:
-    question_set = QuestionSet(name=name, teacher_id=teacher_id)
+def add_choice_question(
+    course: str,
+    content: str,
+    optionA: str,
+    optionB: str,
+    optionC: str,
+    optionD: str,
+) -> int | None:
+    question_node = QuestionNode(type="choice", course=course)
+    choice_question = ChoiceQuestionNode(
+        course=course,
+        content=content,
+        optionA=optionA,
+        optionB=optionB,
+        optionC=optionC,
+        optionD=optionD,
+    )
     try:
-        db.session.add(question_set)
+        db.session.add(question_node)
+        db.session.flush()
+        choice_question.id = question_node.id
+        db.session.add(choice_question)
         db.session.commit()
-        return question_set.id
+        return question_node.id
     except Exception:
         db.session.rollback()
         return None
 
 
-def add_question_set_question(set_id: int, question_id: int, order_num: int) -> bool:
-    question_set_question = QuestionSetQuestion(
-        set_id=set_id,
-        question_id=question_id,
-        order_num=order_num,
-    )
+def add_fill_question(course: str, content: str) -> int | None:
+    question_node = QuestionNode(type="fill", course=course)
+    fill_question = FillQuestionNode(course=course, content=content)
     try:
-        db.session.add(question_set_question)
+        db.session.add(question_node)
+        db.session.flush()
+        fill_question.id = question_node.id
+        db.session.add(fill_question)
         db.session.commit()
-        return True
+        return question_node.id
     except Exception:
         db.session.rollback()
-        return False
+        return None
 
 
-def add_question_set_assignment(
-    set_id: int,
-    group_id: int,
-    begin_time: datetime | None,
-    end_time: datetime | None,
-) -> int | None:
-    question_set_assignment = QuestionSetAssignment(
-        set_id=set_id,
-        group_id=group_id,
-        begin_time=begin_time,
-        end_time=end_time,
-    )
+def add_subjective_question(course: str, content: str) -> int | None:
+    question_node = QuestionNode(type="subjective", course=course)
+    subjective_question = SubjectiveQuestionNode(course=course, content=content)
     try:
-        db.session.add(question_set_assignment)
+        db.session.add(question_node)
+        db.session.flush()
+        subjective_question.id = question_node.id
+        db.session.add(subjective_question)
         db.session.commit()
-        return question_set_assignment.id
+        return question_node.id
+    except Exception:
+        db.session.rollback()
+        return None
+
+
+def add_custom_question(course: str, content: str) -> int | None:
+    question_node = QuestionNode(type="custom", course=course)
+    custom_question = CustomQuestionNode(course=course, imageURL=content)
+    try:
+        db.session.add(question_node)
+        db.session.flush()
+        custom_question.id = question_node.id
+        db.session.add(custom_question)
+        db.session.commit()
+        return question_node.id
     except Exception:
         db.session.rollback()
         return None
