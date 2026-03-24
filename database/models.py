@@ -120,7 +120,7 @@ class FillQuestionNode(db.Model):
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
 
-
+#主观题类
 class SubjectiveQuestionNode(db.Model):
     __tablename__ = "subjectiveQuestionTable"
 
@@ -136,7 +136,7 @@ class SubjectiveQuestionNode(db.Model):
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
 
-
+#自定义题类
 class CustomQuestionNode(db.Model):
     __tablename__ = "customQuestionTable"
 
@@ -147,6 +147,7 @@ class CustomQuestionNode(db.Model):
     )
     course = db.Column(db.String(1024), nullable=True, default="")
     imageURL = db.Column(db.String(2048), nullable=True, default="")
+    createUser = db.Column(db.String(50), nullable=True, default="")
 
 
 CQNode = ChoiceQuestionNode
