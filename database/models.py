@@ -83,6 +83,7 @@ class QuestionNode(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     type = db.Column(db.String(1024), nullable=True, default="UnKnown")
     course = db.Column(db.String(1024), nullable=True, default="UnKnown")
+    belongID = db.Column(db.String(50), nullable=True, default="$PUBLIC$")
 
 #选择题类
 class ChoiceQuestionNode(db.Model):
@@ -103,6 +104,7 @@ class ChoiceQuestionNode(db.Model):
     brief = db.Column(db.String(1024), nullable=True, default="")
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
+    belongID = db.Column(db.String(50), nullable=True, default="$PUBLIC$")
 
 #填空题类
 class FillQuestionNode(db.Model):
@@ -119,6 +121,7 @@ class FillQuestionNode(db.Model):
     brief = db.Column(db.String(1024), nullable=True, default="")
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
+    belongID = db.Column(db.String(50), nullable=True, default="$PUBLIC$")
 
 #主观题类
 class SubjectiveQuestionNode(db.Model):
@@ -135,6 +138,7 @@ class SubjectiveQuestionNode(db.Model):
     brief = db.Column(db.String(1024), nullable=True, default="")
     explanation = db.Column(db.String(4096), nullable=True, default="")
     difficulty = db.Column(db.Integer, nullable=False, default=0)
+    belongID = db.Column(db.String(50), nullable=True, default="$PUBLIC$")
 
 #自定义题类
 class CustomQuestionNode(db.Model):
@@ -147,7 +151,8 @@ class CustomQuestionNode(db.Model):
     )
     course = db.Column(db.String(1024), nullable=True, default="")
     imageURL = db.Column(db.String(2048), nullable=True, default="")
-    createUser = db.Column(db.String(50), nullable=True, default="")
+    brief = db.Column(db.String(1024), nullable=True, default="")
+    belongID = db.Column(db.String(50), nullable=True, default="$PUBLIC$")
 
 
 CQNode = ChoiceQuestionNode
@@ -211,6 +216,7 @@ def init_all_tables(app):
     with app.app_context():
         db.create_all()
         ensure_user_type_schema()
+        ensure_question_schema()
 
 
 def ensure_user_type_schema():
@@ -262,3 +268,91 @@ def ensure_user_type_schema():
         )
     )
     db.session.commit()
+
+
+def ensure_question_schema():
+    inspector = inspect(db.engine)
+    table_names = set(inspector.get_table_names())
+
+    if "questionTable" in table_names:
+        question_columns = {column["name"] for column in inspector.get_columns("questionTable")}
+        if "course" not in question_columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE questionTable "
+                    "ADD COLUMN course VARCHAR(1024) DEFAULT 'UnKnown'"
+                )
+            )
+            db.session.commit()
+        if "belongID" not in question_columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE questionTable "
+                    "ADD COLUMN belongID VARCHAR(50) DEFAULT '$PUBLIC$'"
+                )
+            )
+            db.session.commit()
+
+    question_table_names = (
+        "choiceQuestionTable",
+        "fillQuestionTable",
+        "subjectiveQuestionTable",
+        "customQuestionTable",
+    )
+    for table_name in question_table_names:
+        if table_name not in table_names:
+            continue
+
+        columns = {column["name"] for column in inspector.get_columns(table_name)}
+        if table_name == "customQuestionTable" and "brief" not in columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE customQuestionTable "
+                    "ADD COLUMN brief VARCHAR(1024) DEFAULT ''"
+                )
+            )
+            db.session.commit()
+            columns.add("brief")
+
+        if "belongID" not in columns:
+            db.session.execute(
+                text(
+                    f"ALTER TABLE {table_name} "
+                    "ADD COLUMN belongID VARCHAR(50) DEFAULT '$PUBLIC$'"
+                )
+            )
+            db.session.commit()
+            columns.add("belongID")
+
+        if table_name == "customQuestionTable" and "createUser" in columns:
+            db.session.execute(
+                text(
+                    """
+                    UPDATE questionTable
+                    SET belongID = (
+                        SELECT createUser
+                        FROM customQuestionTable
+                        WHERE customQuestionTable.id = questionTable.id
+                    )
+                    WHERE id IN (
+                        SELECT id
+                        FROM customQuestionTable
+                        WHERE createUser IS NOT NULL
+                          AND createUser != ''
+                    )
+                      AND (belongID IS NULL OR belongID = '' OR belongID = '$PUBLIC$')
+                    """
+                )
+            )
+            db.session.execute(
+                text(
+                    """
+                    UPDATE customQuestionTable
+                    SET belongID = createUser
+                    WHERE (belongID IS NULL OR belongID = '' OR belongID = '$PUBLIC$')
+                      AND createUser IS NOT NULL
+                      AND createUser != ''
+                    """
+                )
+            )
+            db.session.commit()

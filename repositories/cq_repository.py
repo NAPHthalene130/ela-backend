@@ -4,7 +4,9 @@ from database.models import CQNode, QuestionNode
 
 def add_cq_node(cq_node: CQNode) -> bool:
     try:
-        question_node = QuestionNode(type="choice", course=cq_node.course)
+        belong_id = getattr(cq_node, "belongID", "$PUBLIC$") or "$PUBLIC$"
+        question_node = QuestionNode(type="choice", course=cq_node.course, belongID=belong_id)
+        cq_node.belongID = belong_id
         db.session.add(question_node)
         db.session.flush()
         cq_node.id = question_node.id
@@ -31,6 +33,7 @@ def update_cq_node(cq_node: CQNode) -> bool:
         target.brief = cq_node.brief
         target.explanation = cq_node.explanation
         target.difficulty = cq_node.difficulty
+        target.belongID = getattr(cq_node, "belongID", "$PUBLIC$") or "$PUBLIC$"
         db.session.commit()
         return True
     except Exception:

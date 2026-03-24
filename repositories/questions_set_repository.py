@@ -1,5 +1,5 @@
 from core.extensions import db
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from types import SimpleNamespace
 from database.models import (
     ChoiceQuestionNode,
@@ -19,8 +19,9 @@ def add_choice_question(
     optionB: str,
     optionC: str,
     optionD: str,
+    belong_id: str = "$PUBLIC$",
 ) -> int | None:
-    question_node = QuestionNode(type="choice", course=course)
+    question_node = QuestionNode(type="choice", course=course, belongID=belong_id)
     choice_question = ChoiceQuestionNode(
         course=course,
         content=content,
@@ -28,6 +29,7 @@ def add_choice_question(
         optionB=optionB,
         optionC=optionC,
         optionD=optionD,
+        belongID=belong_id,
     )
     try:
         db.session.add(question_node)
@@ -41,9 +43,9 @@ def add_choice_question(
         return None
 
 
-def add_fill_question(course: str, content: str) -> int | None:
-    question_node = QuestionNode(type="fill", course=course)
-    fill_question = FillQuestionNode(course=course, content=content)
+def add_fill_question(course: str, content: str, belong_id: str = "$PUBLIC$") -> int | None:
+    question_node = QuestionNode(type="fill", course=course, belongID=belong_id)
+    fill_question = FillQuestionNode(course=course, content=content, belongID=belong_id)
     try:
         db.session.add(question_node)
         db.session.flush()
@@ -56,9 +58,9 @@ def add_fill_question(course: str, content: str) -> int | None:
         return None
 
 
-def add_subjective_question(course: str, content: str) -> int | None:
-    question_node = QuestionNode(type="subjective", course=course)
-    subjective_question = SubjectiveQuestionNode(course=course, content=content)
+def add_subjective_question(course: str, content: str, belong_id: str = "$PUBLIC$") -> int | None:
+    question_node = QuestionNode(type="subjective", course=course, belongID=belong_id)
+    subjective_question = SubjectiveQuestionNode(course=course, content=content, belongID=belong_id)
     try:
         db.session.add(question_node)
         db.session.flush()
@@ -71,12 +73,12 @@ def add_subjective_question(course: str, content: str) -> int | None:
         return None
 
 
-def add_custom_question(course: str, imageURL: str, createUser: str = "") -> int | None:
-    question_node = QuestionNode(type="custom", course=course)
+def add_custom_question(course: str, imageURL: str, belong_id: str = "$PUBLIC$") -> int | None:
+    question_node = QuestionNode(type="custom", course=course, belongID=belong_id)
     custom_question = CustomQuestionNode(
         course=course,
         imageURL=imageURL,
-        createUser=createUser,
+        belongID=belong_id,
     )
     try:
         db.session.add(question_node)
@@ -88,6 +90,66 @@ def add_custom_question(course: str, imageURL: str, createUser: str = "") -> int
     except Exception:
         db.session.rollback()
         return None
+
+
+def get_ids_by_course_and_type(id, course: str) -> list[tuple[int, str]]:
+    type_alias_map = {
+        "0": "choice",
+        "1": "fill",
+        "2": "subjective",
+        "3": "custom",
+        "choice": "choice",
+        "fill": "fill",
+        "subjective": "subjective",
+        "custom": "custom",
+    }
+    normalized_type = type_alias_map.get(str(id).strip().lower())
+    if not normalized_type or not course:
+        return []
+
+    model_map = {
+        "choice": ChoiceQuestionNode,
+        "fill": FillQuestionNode,
+        "subjective": SubjectiveQuestionNode,
+        "custom": CustomQuestionNode,
+    }
+    table_map = {
+        "choice": "choiceQuestionTable",
+        "fill": "fillQuestionTable",
+        "subjective": "subjectiveQuestionTable",
+        "custom": "customQuestionTable",
+    }
+
+    model_class = model_map[normalized_type]
+    table_name = table_map[normalized_type]
+
+    try:
+        records = (
+            model_class.query.filter_by(course=course)
+            .order_by(model_class.id.asc())
+            .all()
+        )
+        return [(item.id, getattr(item, "brief", "") or "") for item in records]
+    except Exception:
+        pass
+
+    try:
+        columns = {column["name"] for column in inspect(db.engine).get_columns(table_name)}
+        if "id" not in columns or "course" not in columns:
+            return []
+        brief_select = '"brief"' if "brief" in columns else "''"
+        rows = db.session.execute(
+            text(
+                f'SELECT "id", {brief_select} AS brief '
+                f'FROM "{table_name}" '
+                'WHERE "course" = :course '
+                'ORDER BY "id" ASC'
+            ),
+            {"course": course},
+        ).all()
+        return [(row[0], row[1] or "") for row in rows]
+    except Exception:
+        return []
 
 
 def get_questions_set_by_teacherID(teacherID: str) -> list[QuestionSet]:
@@ -129,12 +191,12 @@ def get_question_node_by_id(question_id: int) -> QuestionNode | None:
 
     try:
         row = db.session.execute(
-            text('SELECT id, type FROM "questionTable" WHERE id = :question_id'),
+            text('SELECT id, type, course, belongID FROM "questionTable" WHERE id = :question_id'),
             {"question_id": question_id},
         ).first()
         if not row:
             return None
-        return SimpleNamespace(id=row[0], type=row[1])
+        return SimpleNamespace(id=row[0], type=row[1], course=row[2], belongID=row[3])
     except Exception:
         return None
 
