@@ -70,6 +70,12 @@ def delete_window_for_user(user_id: str, window_id: str):
     return _delete_window_for_user(user_id, window_id)
 
 
+def get_groups_by_teacher(teacher_id: str):
+    from services.group_service import get_groups_by_teacher as _get_groups_by_teacher
+
+    return _get_groups_by_teacher(teacher_id)
+
+
 __all__ = [
     "normalize_user_type",
     "login_user",
@@ -83,4 +89,5 @@ __all__ = [
     "save_message",
     "stream_chat_response",
     "delete_window_for_user",
+    "get_groups_by_teacher",
 ]
