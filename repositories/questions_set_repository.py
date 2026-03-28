@@ -7,6 +7,7 @@ from database.models import (
     FillQuestionNode,
     QuestionNode,
     QuestionSet,
+    QuestionSetAssignment,
     QuestionSetQuestion,
     SubjectiveQuestionNode,
 )
@@ -20,6 +21,8 @@ def add_choice_question(
     optionC: str,
     optionD: str,
     belong_id: str = "$PUBLIC$",
+    answer: str = "",
+    brief: str = "",
 ) -> int | None:
     question_node = QuestionNode(type="choice", course=course, belongID=belong_id)
     choice_question = ChoiceQuestionNode(
@@ -29,6 +32,8 @@ def add_choice_question(
         optionB=optionB,
         optionC=optionC,
         optionD=optionD,
+        answer=answer,
+        brief=brief,
         belongID=belong_id,
     )
     try:
@@ -43,9 +48,21 @@ def add_choice_question(
         return None
 
 
-def add_fill_question(course: str, content: str, belong_id: str = "$PUBLIC$") -> int | None:
+def add_fill_question(
+    course: str,
+    content: str,
+    belong_id: str = "$PUBLIC$",
+    answer: str = "",
+    brief: str = "",
+) -> int | None:
     question_node = QuestionNode(type="fill", course=course, belongID=belong_id)
-    fill_question = FillQuestionNode(course=course, content=content, belongID=belong_id)
+    fill_question = FillQuestionNode(
+        course=course,
+        content=content,
+        answer=answer,
+        brief=brief,
+        belongID=belong_id,
+    )
     try:
         db.session.add(question_node)
         db.session.flush()
@@ -58,9 +75,21 @@ def add_fill_question(course: str, content: str, belong_id: str = "$PUBLIC$") ->
         return None
 
 
-def add_subjective_question(course: str, content: str, belong_id: str = "$PUBLIC$") -> int | None:
+def add_subjective_question(
+    course: str,
+    content: str,
+    belong_id: str = "$PUBLIC$",
+    answer: str = "",
+    brief: str = "",
+) -> int | None:
     question_node = QuestionNode(type="subjective", course=course, belongID=belong_id)
-    subjective_question = SubjectiveQuestionNode(course=course, content=content, belongID=belong_id)
+    subjective_question = SubjectiveQuestionNode(
+        course=course,
+        content=content,
+        answer=answer,
+        brief=brief,
+        belongID=belong_id,
+    )
     try:
         db.session.add(question_node)
         db.session.flush()
@@ -73,11 +102,17 @@ def add_subjective_question(course: str, content: str, belong_id: str = "$PUBLIC
         return None
 
 
-def add_custom_question(course: str, imageURL: str, belong_id: str = "$PUBLIC$") -> int | None:
+def add_custom_question(
+    course: str,
+    imageURL: str,
+    belong_id: str = "$PUBLIC$",
+    brief: str = "",
+) -> int | None:
     question_node = QuestionNode(type="custom", course=course, belongID=belong_id)
     custom_question = CustomQuestionNode(
         course=course,
         imageURL=imageURL,
+        brief=brief,
         belongID=belong_id,
     )
     try:
@@ -163,6 +198,30 @@ def get_questions_set_by_teacherID(teacherID: str) -> list[QuestionSet]:
         return []
 
 
+def create_question_set(teacher_id: str, name: str) -> QuestionSet | None:
+    try:
+        question_set = QuestionSet(name=name, teacher_id=teacher_id)
+        db.session.add(question_set)
+        db.session.commit()
+        return question_set
+    except Exception:
+        db.session.rollback()
+        return None
+
+
+def update_question_set_name(set_id: int, name: str) -> QuestionSet | None:
+    try:
+        question_set = QuestionSet.query.filter_by(id=set_id).first()
+        if not question_set:
+            return None
+        question_set.name = name
+        db.session.commit()
+        return question_set
+    except Exception:
+        db.session.rollback()
+        return None
+
+
 def get_question_set_questions_by_set_id(set_id: int) -> list[QuestionSetQuestion]:
     try:
         return (
@@ -179,6 +238,60 @@ def get_question_set_by_id(set_id: int) -> QuestionSet | None:
         return QuestionSet.query.filter_by(id=set_id).first()
     except Exception:
         return None
+
+
+def is_question_in_set(set_id: int, question_id: int) -> bool:
+    try:
+        return (
+            QuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).first()
+            is not None
+        )
+    except Exception:
+        return False
+
+
+def add_question_to_set(set_id: int, question_id: int) -> bool:
+    try:
+        max_order = (
+            db.session.query(db.func.max(QuestionSetQuestion.order_num))
+            .filter_by(set_id=set_id)
+            .scalar()
+        )
+        relation = QuestionSetQuestion(
+            set_id=set_id,
+            question_id=question_id,
+            order_num=(max_order or 0) + 1,
+        )
+        db.session.add(relation)
+        db.session.commit()
+        return True
+    except Exception:
+        db.session.rollback()
+        return False
+
+
+def remove_question_from_set(set_id: int, question_id: int) -> bool:
+    try:
+        deleted_count = (
+            QuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).delete()
+        )
+        db.session.commit()
+        return deleted_count > 0
+    except Exception:
+        db.session.rollback()
+        return False
+
+
+def delete_question_set(set_id: int) -> bool:
+    try:
+        QuestionSetAssignment.query.filter_by(set_id=set_id).delete()
+        QuestionSetQuestion.query.filter_by(set_id=set_id).delete()
+        deleted_count = QuestionSet.query.filter_by(id=set_id).delete()
+        db.session.commit()
+        return deleted_count > 0
+    except Exception:
+        db.session.rollback()
+        return False
 
 
 def get_question_node_by_id(question_id: int) -> QuestionNode | None:

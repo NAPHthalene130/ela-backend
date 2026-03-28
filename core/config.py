@@ -25,6 +25,8 @@ def resolve_default_database_path() -> str:
 
 
 DEFAULT_DATABASE_PATH = resolve_default_database_path()
+DEFAULT_QUESTION_IMAGE_UPLOAD_DIR = os.path.join(BACKEND_DIR, "instance", "question_images")
+os.makedirs(DEFAULT_QUESTION_IMAGE_UPLOAD_DIR, exist_ok=True)
 
 
 class AppConfig:
@@ -33,6 +35,11 @@ class AppConfig:
         f"sqlite:///{DEFAULT_DATABASE_PATH.replace(os.sep, '/')}",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    QUESTION_IMAGE_UPLOAD_DIR = os.getenv(
+        "ELA_QUESTION_IMAGE_UPLOAD_DIR",
+        DEFAULT_QUESTION_IMAGE_UPLOAD_DIR,
+    )
+    MAX_QUESTION_IMAGE_SIZE = int(os.getenv("ELA_MAX_QUESTION_IMAGE_SIZE", str(10 * 1024 * 1024)))
     JWT_SECRET_KEY = (
         PROJECT_JWT_SECRET_KEY
         or os.getenv("ELA_JWT_SECRET_KEY")
