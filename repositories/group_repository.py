@@ -65,6 +65,13 @@ def get_groups_by_teacherID(teacherID: str) -> list[StudentGroup]:
         return []
 
 
+def get_group_by_id(group_id: int) -> StudentGroup | None:
+    try:
+        return StudentGroup.query.filter_by(id=group_id).first()
+    except Exception:
+        return None
+
+
 def get_students_from_groups(groupID: int) -> list[str]:
     """返回指定小组内的学生 ID 列表。"""
     try:
