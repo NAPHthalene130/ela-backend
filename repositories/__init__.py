@@ -10,6 +10,12 @@ from repositories.chat_repository import (
 from repositories.course_repository import get_course_list
 from repositories.cq_repository import add_cq_node, update_cq_node
 from repositories.group_repository import get_group_info_from_studentGroupTable
+from repositories.student_exam_repository import (
+    get_assignments_for_student,
+    get_exam_paper_details,
+    is_student_in_assignment_group,
+    upsert_student_answers,
+)
 
 __all__ = [
     "get_user_by_id",
@@ -24,4 +30,8 @@ __all__ = [
     "get_group_info_from_studentGroupTable",
     "add_cq_node",
     "update_cq_node",
+    "get_assignments_for_student",
+    "get_exam_paper_details",
+    "is_student_in_assignment_group",
+    "upsert_student_answers",
 ]
