@@ -204,6 +204,17 @@ class QuestionSetAssignment(db.Model):
         db.ForeignKey("studentGroupTable.id", ondelete="CASCADE"),
         nullable=False,
     )
+    create_teacher_id = db.Column(
+        db.String(50),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    assignment_name = db.Column(
+        db.String(1024),
+        nullable=False,
+        default="",
+        server_default="",
+    )
     begin_time = db.Column(db.DateTime, nullable=True)
     end_time = db.Column(db.DateTime, nullable=True)
 
@@ -212,11 +223,46 @@ class QuestionSetAssignment(db.Model):
     )
 
 
+# 学生作答表
+class StudentAnswer(db.Model):
+    __tablename__ = "studentAnswerTable"
+
+    studentID = db.Column(
+        db.String(50),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    assignmentID = db.Column(
+        db.Integer,
+        db.ForeignKey("questionSetAssignmentTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    questionID = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    content = db.Column(
+        db.String(102400),
+        nullable=False,
+        default="",
+        server_default="",
+    )
+    imgURL = db.Column(
+        db.String(2048),
+        nullable=False,
+        default="",
+        server_default="",
+    )
+
+
 def init_all_tables(app):
     with app.app_context():
         db.create_all()
         ensure_user_type_schema()
         ensure_question_schema()
+        ensure_assignment_schema()
+        ensure_student_answer_schema()
 
 
 def ensure_user_type_schema():
@@ -293,6 +339,7 @@ def ensure_question_schema():
             )
             db.session.commit()
 
+
     question_table_names = (
         "choiceQuestionTable",
         "fillQuestionTable",
@@ -356,3 +403,81 @@ def ensure_question_schema():
                 )
             )
             db.session.commit()
+
+
+def ensure_assignment_schema():
+    inspector = inspect(db.engine)
+    if "questionSetAssignmentTable" not in inspector.get_table_names():
+        return
+
+    assignment_columns = {
+        column["name"] for column in inspector.get_columns("questionSetAssignmentTable")
+    }
+    if "create_teacher_id" not in assignment_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE questionSetAssignmentTable "
+                "ADD COLUMN create_teacher_id VARCHAR(50)"
+            )
+        )
+        db.session.commit()
+
+    if "assignment_name" not in assignment_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE questionSetAssignmentTable "
+                "ADD COLUMN assignment_name VARCHAR(1024) NOT NULL DEFAULT ''"
+            )
+        )
+        db.session.commit()
+
+    # 兼容旧数据：若任务来源题单可追溯到教师，则自动回填创建教师。
+    db.session.execute(
+        text(
+            """
+            UPDATE questionSetAssignmentTable
+            SET create_teacher_id = (
+                SELECT questionSetTable.teacher_id
+                FROM questionSetTable
+                WHERE questionSetTable.id = questionSetAssignmentTable.set_id
+            )
+            WHERE create_teacher_id IS NULL OR create_teacher_id = ''
+            """
+        )
+    )
+    db.session.execute(
+        text(
+            """
+            UPDATE questionSetAssignmentTable
+            SET assignment_name = COALESCE(
+                NULLIF(assignment_name, ''),
+                (
+                    SELECT questionSetTable.name
+                    FROM questionSetTable
+                    WHERE questionSetTable.id = questionSetAssignmentTable.set_id
+                ),
+                '未命名任务'
+            )
+            WHERE assignment_name IS NULL OR assignment_name = ''
+            """
+        )
+    )
+    db.session.commit()
+
+
+def ensure_student_answer_schema():
+    inspector = inspect(db.engine)
+    if "studentAnswerTable" not in inspector.get_table_names():
+        return
+
+    answer_columns = {
+        column["name"] for column in inspector.get_columns("studentAnswerTable")
+    }
+    if "questionID" not in answer_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE studentAnswerTable "
+                "ADD COLUMN questionID INTEGER NOT NULL DEFAULT 0"
+            )
+        )
+        db.session.commit()
