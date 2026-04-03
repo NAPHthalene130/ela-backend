@@ -85,6 +85,19 @@ def get_students_from_groups(groupID: int) -> list[str]:
         return []
 
 
+def get_group_ids_by_student(student_id: str) -> list[int]:
+    """返回指定学生所在的小组 ID 列表。"""
+    try:
+        group_members = (
+            StudentGroupMember.query.filter_by(student_id=student_id)
+            .order_by(StudentGroupMember.group_id.asc())
+            .all()
+        )
+        return [member.group_id for member in group_members]
+    except Exception:
+        return []
+
+
 def is_group_owned_by_teacher(group_id: int, teacher_id: str) -> bool:
     """校验小组是否属于指定教师。"""
     try:
