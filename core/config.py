@@ -26,7 +26,11 @@ def resolve_default_database_path() -> str:
 
 DEFAULT_DATABASE_PATH = resolve_default_database_path()
 DEFAULT_QUESTION_IMAGE_UPLOAD_DIR = os.path.join(BACKEND_DIR, "instance", "question_images")
+DEFAULT_STUDENT_ANSWER_IMAGE_UPLOAD_DIR = os.path.join(
+    BACKEND_DIR, "instance", "student_answer_images"
+)
 os.makedirs(DEFAULT_QUESTION_IMAGE_UPLOAD_DIR, exist_ok=True)
+os.makedirs(DEFAULT_STUDENT_ANSWER_IMAGE_UPLOAD_DIR, exist_ok=True)
 
 
 class AppConfig:
@@ -40,6 +44,13 @@ class AppConfig:
         DEFAULT_QUESTION_IMAGE_UPLOAD_DIR,
     )
     MAX_QUESTION_IMAGE_SIZE = int(os.getenv("ELA_MAX_QUESTION_IMAGE_SIZE", str(10 * 1024 * 1024)))
+    STUDENT_ANSWER_IMAGE_UPLOAD_DIR = os.getenv(
+        "ELA_STUDENT_ANSWER_IMAGE_UPLOAD_DIR",
+        DEFAULT_STUDENT_ANSWER_IMAGE_UPLOAD_DIR,
+    )
+    MAX_STUDENT_ANSWER_IMAGE_SIZE = int(
+        os.getenv("ELA_MAX_STUDENT_ANSWER_IMAGE_SIZE", str(10 * 1024 * 1024))
+    )
     JWT_SECRET_KEY = (
         PROJECT_JWT_SECRET_KEY
         or os.getenv("ELA_JWT_SECRET_KEY")
