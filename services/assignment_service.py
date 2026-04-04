@@ -49,6 +49,10 @@ def _format_datetime(value) -> str:
     return str(value)
 
 
+def _is_answer_filled(content: str = "", image_url: str = "") -> bool:
+    return bool(str(content or "").strip() or str(image_url or "").strip())
+
+
 def _save_student_answer_image(
     image_data: str, image_name: str = ""
 ) -> tuple[str | None, str | None]:
@@ -422,7 +426,7 @@ def get_assignment_student_answers_for_teacher(
 def save_assignment_answers_for_student(
     student_id: str, payload: dict
 ) -> tuple[dict | None, int, str]:
-    """保存或提交学生在考试中的答案。"""
+    """保存学生在考试中的答案。"""
     assignment_id = payload.get("assignmentID")
     mode = str(payload.get("mode") or "save").strip().lower()
     answers = payload.get("answers")
@@ -472,6 +476,7 @@ def save_assignment_answers_for_student(
         image_data = str(answer_item.get("imageData") or "").strip()
         image_name = str(answer_item.get("imageFileName") or "").strip()
         image_url = str(answer_item.get("imgURL") or "").strip()
+        remove_image = bool(answer_item.get("removeImage"))
         previous_answer = existing_answers.get(question_id)
         previous_image_url = previous_answer.imgURL if previous_answer else ""
 
@@ -482,7 +487,13 @@ def save_assignment_answers_for_student(
             image_url = saved_image_url or ""
             if previous_image_url and previous_image_url != image_url:
                 _delete_student_answer_asset(previous_image_url)
+        elif remove_image:
+            image_url = ""
+            if previous_image_url:
+                _delete_student_answer_asset(previous_image_url)
         elif not image_url and previous_image_url:
+            image_url = previous_image_url
+        elif image_url and previous_image_url and previous_image_url != image_url:
             _delete_student_answer_asset(previous_image_url)
 
         normalized_answers.append(
@@ -497,23 +508,33 @@ def save_assignment_answers_for_student(
     if saved_answers is None:
         return None, 500, "保存作答失败"
 
+    serialized_answers = [
+        {
+            "questionID": item.questionID,
+            "content": item.content or "",
+            "imgURL": item.imgURL or "",
+        }
+        for item in saved_answers
+    ]
+    answered_question_ids = [
+        item["questionID"]
+        for item in serialized_answers
+        if _is_answer_filled(item.get("content"), item.get("imgURL"))
+    ]
+
     return (
         {
             "assignmentID": assignment_id_int,
             "studentID": student_id,
             "savedCount": len(normalized_answers),
-            "mode": mode,
-            "answers": [
-                {
-                    "questionID": item.questionID,
-                    "content": item.content or "",
-                    "imgURL": item.imgURL or "",
-                }
-                for item in saved_answers
-            ],
+            "mode": "save" if mode == "submit" else mode,
+            "savedAt": _format_datetime(datetime.utcnow()),
+            "answeredCount": len(answered_question_ids),
+            "answeredQuestionIDs": answered_question_ids,
+            "answers": serialized_answers,
         },
         200,
-        "success",
+        "作答已保存",
     )
 
 

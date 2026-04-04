@@ -118,10 +118,7 @@ def get_student_assignment_detail(assignment_id: int):
     return success_response(result, message, status_code)
 
 
-@student_assignment_bp.post("/exam/submit")
-@jwt_required()
-def submit_student_assignment_answers():
-    """保存或提交当前学生的考试作答。"""
+def _save_student_assignment_answers():
     current_user_id = get_jwt_identity()
     payload = request.get_json(silent=True) or {}
     result, status_code, message = save_assignment_answers_for_student(
@@ -131,6 +128,20 @@ def submit_student_assignment_answers():
     if not result:
         return fail_response(message, status_code)
     return success_response(result, message, status_code)
+
+
+@student_assignment_bp.post("/exam/save")
+@jwt_required()
+def save_student_assignment_answers():
+    """保存当前学生的考试作答。"""
+    return _save_student_assignment_answers()
+
+
+@student_assignment_bp.post("/exam/submit")
+@jwt_required()
+def submit_student_assignment_answers():
+    """兼容旧调用路径，内部仍按保存作答处理。"""
+    return _save_student_assignment_answers()
 
 
 @student_assignment_bp.get("/answer-assets/<path:file_name>")
