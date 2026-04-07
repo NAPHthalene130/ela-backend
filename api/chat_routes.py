@@ -73,7 +73,8 @@ def chat_stream():
     """流式聊天接口：边生成边返回文本。"""
     data = request.get_json(silent=True) or {}
     window_id = data.get("windowID")
-    content = data.get("content")
+    # 兼容新旧前端字段：优先读取 msg（Agent 入参），其次回退到 content
+    content = data.get("msg") or data.get("content")
     course = data.get("course")
     current_user_id = get_jwt_identity()
     if not window_id or not content:

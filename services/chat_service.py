@@ -1,3 +1,6 @@
+import json
+
+from agent import run_agent_stream
 from repositories.chat_repository import (
     create_chat_window,
     delete_user_chat_window,
@@ -7,7 +10,10 @@ from repositories.chat_repository import (
     save_chat_message,
 )
 from repositories.course_repository import get_course_list as fetch_course_list
-from util.getLlmResponse import getLlmRes
+
+
+def _encode_stream_event(event_type: str, data: str) -> str:
+    return json.dumps({"type": event_type, "data": data}, ensure_ascii=False) + "\n"
 
 
 def get_course_list() -> list[str]:
@@ -43,14 +49,30 @@ def delete_window_for_user(user_id: str, window_id: str):
 def stream_chat_response(user_id: str, chat_window_id: str, message: str, course: str = ""):
     """执行流式聊天并在流结束后落库完整回复。"""
     save_chat_message(chat_window_id, message, True)
-    prompt = f"请返回以下内容:userId={user_id}\nchatWindowID={chat_window_id}\ncourse={course or ''}"
 
     def generate():
+        full_content_parts = []
         try:
-            full_content = getLlmRes(message, prompt)
-            yield full_content
+            for event in run_agent_stream(
+                msg=message,
+                user_id=user_id,
+                chat_window_id=chat_window_id,
+                course=course or "",
+            ):
+                event_type = event.get("type", "content")
+                event_data = event.get("data", "")
+                if event_type == "content" and event_data:
+                    full_content_parts.append(event_data)
+                yield _encode_stream_event(event_type, event_data)
+
+            full_content = "".join(full_content_parts).strip()
+            if not full_content:
+                full_content = "我已经收到你的问题，但暂时没有生成有效回复，请稍后重试。"
+                yield _encode_stream_event("content", full_content)
+                yield _encode_stream_event("done", "")
             save_chat_message(chat_window_id, full_content, False)
         except Exception as exc:
-            yield f"\n[System Error: {exc}]"
+            error_text = f"[System Error: {exc}]"
+            yield _encode_stream_event("error", error_text)
 
     return generate()
