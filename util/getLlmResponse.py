@@ -47,15 +47,26 @@ def _load_llm_config():
 
 def getLlmRes(msg: str, prompt: str, model_tier: str = "pro") -> str:
     api_key, base_url, lite_model, flash_model, pro_model = _load_llm_config()
+    normalized_tier = (model_tier or "pro").lower()
     model_map = {
         "lite": lite_model,
         "flash": flash_model,
         "pro": pro_model,
     }
-    model = model_map.get((model_tier or "pro").lower(), pro_model)
+    model = model_map.get(normalized_tier, pro_model)
     client = OpenAI(base_url=base_url, api_key=api_key)
-    response = client.chat.completions.create(
-        model=model,
-        messages=_build_messages(msg, prompt),
-    )
+    request_kwargs = {
+        "model": model,
+        "messages": _build_messages(msg, prompt),
+        "stream": False,
+    }
+    if normalized_tier == "pro":
+        request_kwargs["extra_body"] = {"thinking": {"type": "enabled"}}
+    try:
+        response = client.chat.completions.create(**request_kwargs)
+    except Exception:
+        if normalized_tier != "pro":
+            raise
+        request_kwargs.pop("extra_body", None)
+        response = client.chat.completions.create(**request_kwargs)
     return _extract_text_from_chat_response(response)
