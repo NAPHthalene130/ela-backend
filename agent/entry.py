@@ -1,38 +1,4 @@
-from agent.tools import get_finally_response, render_prompt
-
-
-def _invoke_with_langchain(
-    msg: str, user_id: str = "", chat_window_id: str = "", course: str = ""
-) -> str:
-    # 延迟导入，避免在未安装 LangChain 依赖时导致应用启动失败
-    from langchain_core.messages import HumanMessage, SystemMessage
-    from langchain_openai import ChatOpenAI
-
-    from project_config import API_KEY, BASE_URL, Pro_Model
-
-    llm = ChatOpenAI(
-        model=Pro_Model,
-        api_key=API_KEY,
-        base_url=BASE_URL,
-        temperature=0.2,
-    )
-    response = llm.invoke(
-        [
-            SystemMessage(
-                content=render_prompt(
-                    "system_prompt.txt",
-                    {
-                        "msg": msg or "",
-                        "user_id": user_id or "",
-                        "chat_window_id": chat_window_id or "",
-                        "course": course or "",
-                    },
-                )
-            ),
-            HumanMessage(content=msg),
-        ]
-    )
-    return getattr(response, "content", "") or ""
+from agent.tools import auth_gate, get_finally_response
 
 
 def run_agent_stream(
@@ -44,33 +10,26 @@ def run_agent_stream(
         return
 
     yield {"type": "tip", "data": "正在思考"}
-    embedded_msg = render_prompt(
-        "system_prompt.txt",
-        {
-            "msg": clean_msg,
-            "user_id": user_id or "",
-            "chat_window_id": chat_window_id or "",
-            "course": course or "",
-        },
-    )
-
-    try:
-        # 主路径：先让 LangChain 完成中间推理，再进入最终回答工具
-        processed_msg = _invoke_with_langchain(
-            embedded_msg, user_id, chat_window_id, course
-        ) or embedded_msg
-    except Exception:
-        # 兜底路径：LangChain 异常时继续使用原始嵌入文本
-        processed_msg = embedded_msg
+    if not auth_gate(clean_msg):
+        yield {"type": "content", "data": "当前内容不适合讨论，请换一个试试吧"}
+        yield {"type": "done", "data": ""}
+        return
 
     yield {"type": "tip", "data": "正在生成最终回答"}
-    for piece in get_finally_response(
-        processed_msg,
+    for chunk in get_finally_response(
+        clean_msg,
         user_id=user_id,
         chat_window_id=chat_window_id,
         course=course,
     ):
-        yield {"type": "content", "data": piece}
+        if isinstance(chunk, dict):
+            event_type = chunk.get("type", "content")
+            event_data = chunk.get("data", "")
+        else:
+            event_type = "content"
+            event_data = chunk
+        if event_data:
+            yield {"type": event_type, "data": event_data}
     yield {"type": "done", "data": ""}
 
 

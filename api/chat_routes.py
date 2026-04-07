@@ -81,7 +81,15 @@ def chat_stream():
         return fail_response("Missing parameters", 400)
 
     generator = stream_chat_response(current_user_id, window_id, content, course)
-    return Response(stream_with_context(generator), mimetype="text/plain")
+    return Response(
+        stream_with_context(generator),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @chat_bp.post("/delete-window")

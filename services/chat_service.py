@@ -13,7 +13,10 @@ from repositories.course_repository import get_course_list as fetch_course_list
 
 
 def _encode_stream_event(event_type: str, data: str) -> str:
-    return json.dumps({"type": event_type, "data": data}, ensure_ascii=False) + "\n"
+    if event_type == "done":
+        return "data: [DONE]\n\n"
+    payload = json.dumps({"type": event_type, "data": data}, ensure_ascii=False)
+    return f"event: {event_type}\ndata: {payload}\n\n"
 
 
 def get_course_list() -> list[str]:
