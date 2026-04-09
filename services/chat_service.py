@@ -51,13 +51,12 @@ def _extract_assistant_text(payload: dict) -> str:
     body = result.get("payload") or {}
     if not isinstance(body, dict):
         return ""
-    if ui_type == "example_card":
+    if ui_type in (
+        "exercise_recommendation_card",
+        "knowledge_graph_card",
+        "learning_review_card",
+    ):
         return str(body.get("brief_text", "") or "").strip()
-    if ui_type == "route_intent":
-        route = str(body.get("route", "") or "").strip()
-        return f"已为你准备页面跳转：{route}" if route else ""
-    if ui_type == "graph":
-        return "已为你准备相关知识图谱。"
     return ""
 
 

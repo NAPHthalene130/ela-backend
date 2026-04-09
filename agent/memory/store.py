@@ -10,7 +10,6 @@ def get_session_history(session_id: str):
         from langchain_community.chat_message_histories import SQLChatMessageHistory
     except Exception as exc:
         raise RuntimeError("缺少 SQLChatMessageHistory 依赖") from exc
-
     return SQLChatMessageHistory(
         session_id=str(session_id or "").strip(),
         connection_string=DATABASE_URL,

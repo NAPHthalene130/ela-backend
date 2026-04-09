@@ -31,6 +31,22 @@ class UserChatWindowTable(db.Model):
     createTime = db.Column(db.String(64), nullable=False)
 
 
+class chatCardNode(db.Model):
+    __tablename__ = "chatCardNodeTable"
+    __table_args__ = (
+        db.UniqueConstraint("windowsID", "no", name="uq_chat_card_window_no"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    windowsID = db.Column(
+        db.String(256),
+        db.ForeignKey("userChatWindowTable.windowsId", ondelete="CASCADE"),
+        nullable=False,
+    )
+    no = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    json = db.Column(db.String(8196), nullable=False, default="", server_default="")
+
+
 class WindowChatNode(db.Model):
     __tablename__ = "windowChatTable"
 
@@ -263,6 +279,7 @@ def init_all_tables(app):
         ensure_question_schema()
         ensure_assignment_schema()
         ensure_student_answer_schema()
+        ensure_chat_card_schema()
 
 
 def ensure_user_type_schema():
@@ -481,3 +498,98 @@ def ensure_student_answer_schema():
             )
         )
         db.session.commit()
+
+
+def ensure_chat_card_schema():
+    inspector = inspect(db.engine)
+    if "chatCardNodeTable" not in inspector.get_table_names():
+        return
+
+    card_columns = {
+        column["name"] for column in inspector.get_columns("chatCardNodeTable")
+    }
+    if "id" not in card_columns:
+        db.session.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS chatCardNodeTable_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    windowsID VARCHAR(256) NOT NULL,
+                    no INTEGER NOT NULL DEFAULT 0,
+                    json VARCHAR(8196) NOT NULL DEFAULT '',
+                    FOREIGN KEY(windowsID) REFERENCES userChatWindowTable(windowsId) ON DELETE CASCADE
+                )
+                """
+            )
+        )
+        db.session.execute(
+            text(
+                """
+                INSERT INTO chatCardNodeTable_new (windowsID, no, json)
+                SELECT windowsID, COALESCE(no, 0), COALESCE(json, '')
+                FROM chatCardNodeTable
+                """
+            )
+        )
+        db.session.execute(text("DROP TABLE chatCardNodeTable"))
+        db.session.execute(text("ALTER TABLE chatCardNodeTable_new RENAME TO chatCardNodeTable"))
+        db.session.execute(
+            text(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS uq_chat_card_window_no
+                ON chatCardNodeTable (windowsID, no)
+                """
+            )
+        )
+        db.session.execute(
+            text(
+                """
+                CREATE INDEX IF NOT EXISTS ix_chat_card_window_id
+                ON chatCardNodeTable (windowsID)
+                """
+            )
+        )
+        db.session.commit()
+        return
+
+    if "windowsID" not in card_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE chatCardNodeTable "
+                "ADD COLUMN windowsID VARCHAR(256) NOT NULL DEFAULT ''"
+            )
+        )
+        db.session.commit()
+    if "no" not in card_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE chatCardNodeTable "
+                "ADD COLUMN no INTEGER NOT NULL DEFAULT 0"
+            )
+        )
+        db.session.commit()
+    if "json" not in card_columns:
+        db.session.execute(
+            text(
+                "ALTER TABLE chatCardNodeTable "
+                "ADD COLUMN json VARCHAR(8196) NOT NULL DEFAULT ''"
+            )
+        )
+        db.session.commit()
+    db.session.execute(
+        text(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_chat_card_window_no
+            ON chatCardNodeTable (windowsID, no)
+            """
+        )
+    )
+    db.session.execute(
+        text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_chat_card_window_id
+            ON chatCardNodeTable (windowsID)
+            """
+        )
+    )
+    db.session.commit()
