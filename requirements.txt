@@ -1,8 +1,0 @@
-Flask
-Flask-Cors
-Flask-SQLAlchemy
-Flask-JWT-Extended
-redis
-openai
-langchain
-langchain-openai

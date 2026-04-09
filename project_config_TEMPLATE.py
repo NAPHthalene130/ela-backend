@@ -7,3 +7,7 @@ Pro_Model = "doubao-seed-2-0-pro-260215"
 
 # JWT 签名密钥
 JWT_SECRET_KEY = "<JWT_SECRET_KEY>"
+NEO4J_URI = "neo4j://127.0.0.1:7687"
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = "<NEO4J_PASSWORD>"
+NEO4J_DATABASE = "neo4j"

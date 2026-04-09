@@ -19,6 +19,48 @@ def _encode_stream_event(event_type: str, data: str) -> str:
     return f"event: {event_type}\ndata: {payload}\n\n"
 
 
+def _parse_sse_payload(raw_block: str) -> dict:
+    if not raw_block:
+        return {}
+    data_lines = []
+    for line in raw_block.splitlines():
+        if line.startswith("data:"):
+            data_lines.append(line[5:].strip())
+    if not data_lines:
+        return {}
+    raw_data = "\n".join(data_lines)
+    if raw_data == "[DONE]":
+        return {"type": "done", "content": ""}
+    try:
+        return json.loads(raw_data)
+    except Exception:
+        return {}
+
+
+def _extract_assistant_text(payload: dict) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    if payload.get("type") == "text":
+        return str(payload.get("content", "") or "").strip()
+    if payload.get("type") != "json":
+        return ""
+    result = payload.get("result") or {}
+    if not isinstance(result, dict):
+        return ""
+    ui_type = str(result.get("ui_type", "") or "").strip()
+    body = result.get("payload") or {}
+    if not isinstance(body, dict):
+        return ""
+    if ui_type == "example_card":
+        return str(body.get("brief_text", "") or "").strip()
+    if ui_type == "route_intent":
+        route = str(body.get("route", "") or "").strip()
+        return f"已为你准备页面跳转：{route}" if route else ""
+    if ui_type == "graph":
+        return "已为你准备相关知识图谱。"
+    return ""
+
+
 def get_course_list() -> list[str]:
     return fetch_course_list()
 
@@ -62,6 +104,14 @@ def stream_chat_response(user_id: str, chat_window_id: str, message: str, course
                 chat_window_id=chat_window_id,
                 course=course or "",
             ):
+                if isinstance(event, str):
+                    parsed_payload = _parse_sse_payload(event)
+                    assistant_text = _extract_assistant_text(parsed_payload)
+                    if assistant_text:
+                        full_content_parts.append(assistant_text)
+                    yield event
+                    continue
+
                 event_type = event.get("type", "content")
                 event_data = event.get("data", "")
                 if event_type == "content" and event_data:
@@ -71,8 +121,6 @@ def stream_chat_response(user_id: str, chat_window_id: str, message: str, course
             full_content = "".join(full_content_parts).strip()
             if not full_content:
                 full_content = "我已经收到你的问题，但暂时没有生成有效回复，请稍后重试。"
-                yield _encode_stream_event("content", full_content)
-                yield _encode_stream_event("done", "")
             save_chat_message(chat_window_id, full_content, False)
         except Exception as exc:
             error_text = f"[System Error: {exc}]"
