@@ -10,6 +10,11 @@ from repositories.chat_repository import (
 from repositories.course_repository import get_course_list
 from repositories.cq_repository import add_cq_node, update_cq_node
 from repositories.group_repository import get_group_info_from_studentGroupTable
+from repositories.vectorDB_repository import (
+    add_question,
+    delete_question,
+    search_question_topK,
+)
 
 __all__ = [
     "get_user_by_id",
@@ -24,4 +29,7 @@ __all__ = [
     "get_group_info_from_studentGroupTable",
     "add_cq_node",
     "update_cq_node",
+    "add_question",
+    "delete_question",
+    "search_question_topK",
 ]

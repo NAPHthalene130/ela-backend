@@ -6,3 +6,4 @@ redis
 openai
 langchain
 langchain-openai
+chromadb

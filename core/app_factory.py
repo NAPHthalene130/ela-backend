@@ -4,6 +4,7 @@ from api import register_blueprints
 from core.config import AppConfig
 from core.extensions import cors, db, jwt
 from database.models import init_all_tables
+from database.vectorDB import init_vector_db
 
 
 def create_app(config: type[AppConfig] = AppConfig) -> Flask:
@@ -19,6 +20,7 @@ def create_app(config: type[AppConfig] = AppConfig) -> Flask:
     # 注册路由并完成数据库结构初始化
     register_blueprints(app)
     init_all_tables(app)
+    init_vector_db()
 
     @app.get("/")
     def health_check():
