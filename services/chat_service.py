@@ -9,6 +9,7 @@ from repositories.chat_repository import (
     is_window_owned_by_user,
     save_chat_message,
 )
+from repositories.card_repository import get_card_list
 from repositories.course_repository import get_course_list as fetch_course_list
 
 
@@ -47,16 +48,13 @@ def _extract_assistant_text(payload: dict) -> str:
     result = payload.get("result") or {}
     if not isinstance(result, dict):
         return ""
+    if result.get("type") == "questions":
+        return "已为你推荐5道习题，请在右侧功能卡片查看并作答。"
     ui_type = str(result.get("ui_type", "") or "").strip()
-    body = result.get("payload") or {}
-    if not isinstance(body, dict):
-        return ""
-    if ui_type in (
-        "exercise_recommendation_card",
-        "knowledge_graph_card",
-        "learning_review_card",
-    ):
-        return str(body.get("brief_text", "") or "").strip()
+    if ui_type:
+        body = result.get("payload") or {}
+        if isinstance(body, dict):
+            return str(body.get("brief_text", "") or "").strip()
     return ""
 
 
@@ -68,8 +66,32 @@ def get_windows_by_user(user_id: str) -> list[dict]:
     return get_window_history(user_id)
 
 
-def get_history_by_window(window_id: str) -> list[dict]:
-    return get_chat_history(window_id)
+def _parse_card_json(raw_json: str):
+    text = str(raw_json or "").strip()
+    if not text:
+        return []
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
+def get_history_by_window(window_id: str) -> dict:
+    cards = get_card_list(window_id)
+    return {
+        "messages": get_chat_history(window_id),
+        "featureCards": [
+            {
+                "id": card.id,
+                "title": "习题推荐",
+                "type": "questions",
+                "content": _parse_card_json(card.json),
+                "no": card.no,
+            }
+            for card in cards
+        ],
+    }
 
 
 def create_window_for_user(user_id: str) -> str | None:
@@ -123,6 +145,10 @@ def stream_chat_response(user_id: str, chat_window_id: str, message: str, course
             save_chat_message(chat_window_id, full_content, False)
         except Exception as exc:
             error_text = f"[System Error: {exc}]"
-            yield _encode_stream_event("error", error_text)
+            yield (
+                "data: "
+                + json.dumps({"type": "error", "content": error_text}, ensure_ascii=False)
+                + "\n\n"
+            )
 
     return generate()

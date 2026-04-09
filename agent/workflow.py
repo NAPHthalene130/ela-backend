@@ -8,6 +8,7 @@ from agent.tools import (
 from agent.adapters.stream_adapter import generate_json_packet, generate_text_stream
 from agent.memory import build_history_prompt
 from agent.providers.doubao import auth_gate, create_langchain_chat_model
+from repositories.card_repository import add_card
 
 INTENT_SYSTEM_PROMPT = """
 你是学习平台的意图识别器。
@@ -179,7 +180,11 @@ def _invoke_tool(tool_obj, payload: dict) -> dict:
     return tool_obj(**payload)
 
 
-def _resolve_tool_result(intent: dict, user_id: str) -> tuple[str, dict] | tuple[None, None]:
+def _resolve_tool_result(
+    intent: dict,
+    user_id: str,
+    chat_window_id: str,
+) -> tuple[str, dict] | tuple[None, None]:
     tool_name = str(intent.get("tool_name", "") or "").strip().lower()
     course_name = str(intent.get("course_name", "") or "").strip()
     topic = str(intent.get("topic", "") or "").strip()
@@ -190,6 +195,7 @@ def _resolve_tool_result(intent: dict, user_id: str) -> tuple[str, dict] | tuple
             {
                 "course_name": course_name,
                 "topic": topic or query_text,
+                "chat_window_id": chat_window_id or "",
             },
         )
         return "exercise_recommendation", result
@@ -218,14 +224,14 @@ def run_agentic_stream(msg: str, user_id: str = "", chat_window_id: str = "", co
     clean_msg = (msg or "").strip()
     if not clean_msg:
         return
-    if not auth_gate(clean_msg):
-        yield "data: " + json.dumps(
-            {"type": "text", "content": "当前内容不适合讨论，请换一个试试吧"},
-            ensure_ascii=False,
-        ) + "\n\n"
-        yield "data: [DONE]\n\n"
-        return
     try:
+        if not auth_gate(clean_msg):
+            yield "data: " + json.dumps(
+                {"type": "text", "content": "当前内容不适合讨论，请换一个试试吧"},
+                ensure_ascii=False,
+            ) + "\n\n"
+            yield "data: [DONE]\n\n"
+            return
         intent = _plan_intent(clean_msg, course or "")
         intent_name = str(intent.get("intent", "chat") or "chat").strip().lower()
         course_name = str(intent.get("course_name", "") or course or "").strip()
@@ -243,7 +249,15 @@ def run_agentic_stream(msg: str, user_id: str = "", chat_window_id: str = "", co
         )
         if not need_tool:
             return
-        mode, result = _resolve_tool_result(intent, user_id)
+        mode, result = _resolve_tool_result(intent, user_id, chat_window_id)
+        if (
+            mode == "exercise_recommendation"
+            and isinstance(result, dict)
+            and result.get("type") == "questions"
+        ):
+            card_content = result.get("content")
+            if isinstance(card_content, list):
+                add_card(chat_window_id, json.dumps(card_content, ensure_ascii=False))
         if mode and isinstance(result, dict):
             yield from generate_json_packet(mode, result)
             return
