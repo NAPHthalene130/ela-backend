@@ -1,8 +1,8 @@
 from core.extensions import db
-from database.models import chatCardNode
+from database.models import ChatCardNode
 
 
-def add_card(windowID: str, json_content: str) -> chatCardNode | None:
+def add_card(windowID: str, json_content: str) -> ChatCardNode | None:
     normalized_window_id = str(windowID or "").strip()
     if not normalized_window_id:
         return None
@@ -11,12 +11,12 @@ def add_card(windowID: str, json_content: str) -> chatCardNode | None:
         normalized_json = normalized_json[:8196]
     try:
         max_no = (
-            db.session.query(db.func.max(chatCardNode.no))
-            .filter(chatCardNode.windowsID == normalized_window_id)
+            db.session.query(db.func.max(ChatCardNode.no))
+            .filter(ChatCardNode.windowsID == normalized_window_id)
             .scalar()
         )
         next_no = int(max_no or 0) + 1
-        card = chatCardNode(
+        card = ChatCardNode(
             windowsID=normalized_window_id,
             no=next_no,
             json=normalized_json,
@@ -29,14 +29,14 @@ def add_card(windowID: str, json_content: str) -> chatCardNode | None:
         return None
 
 
-def get_card_list(windowID: str) -> list[chatCardNode]:
+def get_card_list(windowID: str) -> list[ChatCardNode]:
     normalized_window_id = str(windowID or "").strip()
     if not normalized_window_id:
         return []
     try:
         return (
-            chatCardNode.query.filter_by(windowsID=normalized_window_id)
-            .order_by(chatCardNode.no.asc())
+            ChatCardNode.query.filter_by(windowsID=normalized_window_id)
+            .order_by(ChatCardNode.no.asc())
             .all()
         )
     except Exception:
@@ -48,7 +48,7 @@ def delete_card(windowID: str) -> bool:
     if not normalized_window_id:
         return False
     try:
-        chatCardNode.query.filter_by(windowsID=normalized_window_id).delete()
+        ChatCardNode.query.filter_by(windowsID=normalized_window_id).delete()
         db.session.commit()
         return True
     except Exception:

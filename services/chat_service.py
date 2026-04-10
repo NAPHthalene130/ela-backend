@@ -9,6 +9,7 @@ from repositories.chat_repository import (
     is_window_owned_by_user,
     save_chat_message,
 )
+from repositories.answer_repository import add_answer_history
 from repositories.card_repository import get_card_list
 from repositories.course_repository import get_course_list as fetch_course_list
 
@@ -110,6 +111,10 @@ def delete_window_for_user(user_id: str, window_id: str):
     if not success:
         return False, 500, "Failed to delete window"
     return True, 200, "Window deleted"
+
+
+def add_answer_history_for_user(user_id: str, question_id: int, is_correct: bool):
+    return add_answer_history(user_id, question_id, is_correct)
 
 
 def stream_chat_response(user_id: str, chat_window_id: str, message: str, course: str = ""):

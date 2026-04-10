@@ -1,4 +1,5 @@
 from repositories.auth_repository import get_user_by_email, get_user_by_id
+from repositories.answer_repository import add_answer_history
 from repositories.card_repository import add_card, delete_card, get_card_list
 from repositories.chat_repository import (
     create_chat_window,
@@ -21,6 +22,7 @@ from repositories.student_exam_repository import (
 __all__ = [
     "get_user_by_id",
     "get_user_by_email",
+    "add_answer_history",
     "add_card",
     "get_card_list",
     "delete_card",

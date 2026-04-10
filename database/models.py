@@ -31,7 +31,7 @@ class UserChatWindowTable(db.Model):
     createTime = db.Column(db.String(64), nullable=False)
 
 
-class chatCardNode(db.Model):
+class ChatCardNode(db.Model):
     __tablename__ = "chatCardNodeTable"
     __table_args__ = (
         db.UniqueConstraint("windowsID", "no", name="uq_chat_card_window_no"),
@@ -270,6 +270,26 @@ class StudentAnswer(db.Model):
         default="",
         server_default="",
     )
+
+
+class AnswerHistory(db.Model):
+    __tablename__ = "answerHistoryTable"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userID = db.Column(
+        db.String(50),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    course = db.Column(db.String(1024), nullable=False, default="", server_default="")
+    questionID = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    questionBrief = db.Column(db.String(1024), nullable=False, default="", server_default="")
+    isCorrect = db.Column(db.Boolean, nullable=False, default=False, server_default="0")
+    date = db.Column(db.Date, nullable=False)
 
 
 def init_all_tables(app):
