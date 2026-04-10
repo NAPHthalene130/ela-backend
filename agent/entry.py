@@ -1,6 +1,6 @@
 import json
 
-from llm.graph.workflow import run_agentic_stream
+from agent.workflow import run_agentic_stream
 
 
 def run_agent_stream(

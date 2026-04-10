@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from database.models import UserChatWindowTable, WindowChatNode
+from database.models import ChatCardNode, UserChatWindowTable, WindowChatNode
 
 
 def create_chat_window(user_id: str) -> str | None:
@@ -94,6 +94,7 @@ def delete_user_chat_window(window_id: str) -> bool:
 
     try:
         WindowChatNode.query.filter_by(windowID=window_id).delete()
+        ChatCardNode.query.filter_by(windowsID=window_id).delete()
         UserChatWindowTable.query.filter_by(windowsId=window_id).delete()
         db.session.commit()
         return True

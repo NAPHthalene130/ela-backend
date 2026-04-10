@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from core.responses import fail_response, success_response
 from services.chat_service import (
+    add_answer_history_for_user,
     create_window_for_user,
     delete_window_for_user,
     get_course_list,
@@ -106,3 +107,21 @@ def delete_window():
     if not success:
         return fail_response(message, status_code)
     return success_response(msg=message)
+
+
+@chat_bp.post("/answer-history")
+@jwt_required()
+def add_answer_history_record():
+    data = request.get_json(silent=True) or {}
+    current_user_id = get_jwt_identity()
+    user_id = str(data.get("userID") or "").strip()
+    question_id = data.get("questionID")
+    is_correct = data.get("isCorrect")
+    if not user_id or question_id is None or is_correct is None:
+        return fail_response("Missing parameters", 400)
+    if user_id != current_user_id:
+        return fail_response("User mismatch", 403)
+    saved = add_answer_history_for_user(user_id, question_id, bool(is_correct))
+    if saved is None:
+        return fail_response("Failed to add answer history", 500)
+    return success_response(msg="Answer history saved")

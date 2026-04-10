@@ -3,14 +3,12 @@ from pathlib import Path
 
 from openai import OpenAI
 
-PROMPTS_DIR = Path(__file__).resolve().parents[2] / "agent" / "prompts"
+PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 
 
 def _load_runtime_config():
     try:
         from project_config import API_KEY, BASE_URL
-        
-        # 兼容旧配置中只有 MODEL 的情况
         try:
             from project_config import Lite_Model, Pro_Model
         except ImportError:
@@ -21,7 +19,6 @@ def _load_runtime_config():
             except ImportError:
                 Lite_Model = None
                 Pro_Model = None
-
         return {
             "api_key": API_KEY,
             "base_url": BASE_URL,
@@ -67,11 +64,9 @@ def call_chat_once(
     config = _load_runtime_config()
     if not config:
         return ""
-
     model = config["lite_model"] if model_level == "lite" else config["pro_model"]
     if not model:
         return ""
-
     try:
         client = OpenAI(base_url=config["base_url"], api_key=config["api_key"])
         response = client.chat.completions.create(
@@ -95,15 +90,14 @@ def create_langchain_chat_model(
     model_level: str = "pro",
     streaming: bool = True,
     temperature: float = 0,
+    enable_reasoning: bool = False,
 ):
     config = _load_runtime_config()
     if not config:
         raise RuntimeError("缺少大模型配置，请提供 project_config.py 或环境变量。")
-
     model = config["lite_model"] if model_level == "lite" else config["pro_model"]
     if not model:
         raise RuntimeError("未找到可用模型配置。")
-
     try:
         from langchain_openai import ChatOpenAI
     except Exception:
@@ -111,12 +105,34 @@ def create_langchain_chat_model(
             from langchain_community.chat_models import ChatOpenAI
         except Exception as exc:
             raise RuntimeError("缺少 LangChain ChatOpenAI 依赖。") from exc
-
     base_kwargs = {
         "temperature": temperature,
         "streaming": streaming,
     }
+    reasoning_kwargs = {}
+    if enable_reasoning:
+        reasoning_kwargs = {
+            "model_kwargs": {
+                "extra_body": {
+                    "thinking": {"type": "enabled"},
+                }
+            }
+        }
     constructor_candidates = [
+        {
+            **base_kwargs,
+            **reasoning_kwargs,
+            "model": model,
+            "api_key": config["api_key"],
+            "base_url": config["base_url"],
+        },
+        {
+            **base_kwargs,
+            **reasoning_kwargs,
+            "model_name": model,
+            "openai_api_key": config["api_key"],
+            "openai_api_base": config["base_url"],
+        },
         {
             **base_kwargs,
             "model": model,
@@ -140,58 +156,13 @@ def create_langchain_chat_model(
     raise RuntimeError("ChatOpenAI 初始化失败。") from last_error
 
 
-def get_finally_response(
-    msg: str,
-    user_id: str = "",
-    chat_window_id: str = "",
-    course: str = "",
-):
-    config = _load_runtime_config()
-    if not config or not config.get("pro_model"):
-        return
-
-    client = OpenAI(base_url=config["base_url"], api_key=config["api_key"])
-    prompt_text = render_prompt(
-        "final_response_prompt.txt",
-        {
-            "msg": msg or "",
-            "user_id": user_id or "",
-            "chat_window_id": chat_window_id or "",
-            "course": course or "",
-        },
-    )
-    completion = client.chat.completions.create(
-        model=config["pro_model"],
-        messages=[{"role": "user", "content": prompt_text}],
-        stream=True,
-    )
-    with completion:
-        for chunk in completion:
-            choices = getattr(chunk, "choices", None) or []
-            if not choices:
-                continue
-            delta = getattr(choices[0], "delta", None)
-            reasoning_piece = getattr(delta, "reasoning_content", "") if delta else ""
-            piece = getattr(delta, "content", "") if delta else ""
-            if reasoning_piece:
-                if isinstance(reasoning_piece, list):
-                    reasoning_piece = "".join(
-                        str(item or "") for item in reasoning_piece if item is not None
-                    )
-                yield {"type": "reasoning", "data": str(reasoning_piece)}
-            if piece:
-                yield {"type": "content", "data": piece}
-
-
 def auth_gate(msg: str) -> bool:
     content = (msg or "").strip()
     if not content:
         return False
-
     config = _load_runtime_config()
     if not config or not config.get("lite_model"):
         return False
-
     client = OpenAI(base_url=config["base_url"], api_key=config["api_key"])
     policy_prompt = render_prompt("auth_gate_prompt.txt", {"msg": content})
     try:
@@ -211,8 +182,6 @@ def auth_gate(msg: str) -> bool:
         if choices:
             message = getattr(choices[0], "message", None)
             text = (getattr(message, "content", "") or "").strip().upper()
-        print(f"[DEBUG] auth_gate prompt: {content} -> response: {text}")
         return text.startswith("PASS")
-    except Exception as e:
-        print(f"[DEBUG] auth_gate exception: {e}")
+    except Exception:
         return False

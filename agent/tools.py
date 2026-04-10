@@ -4,136 +4,163 @@ except Exception:
     def tool(func):
         return func
 
-
-def _normalize_course_name(course_name: str) -> str:
-    return (course_name or "").strip()
-
-
-@tool
-def get_example_card(course_name: str, topic: str = "") -> dict:
-    """
-    当用户明确想要做练习题、来一道例题、生成题目卡片、挂载习题组件时调用。
-
-    需要提取的参数：
-    1. course_name：用户当前讨论的课程或学科名称，例如数据结构、操作系统、高等数学。
-    2. topic：用户想练习的具体知识点，例如二分查找、动态规划、极限。
-
-    当用户只是要求纯文字讲解时不要调用本工具。
-    当用户希望在聊天区域旁边出现可做题的组件时优先调用本工具。
-    返回值必须是 Generative UI 可以直接消费的 example_card 字典结构。
-    """
-    normalized_course = _normalize_course_name(course_name) or "通用"
-    normalized_topic = (topic or "").strip() or "基础练习"
-    return {
-        "ui_type": "example_card",
-        "payload": {
-            "course": normalized_course,
-            "topic": normalized_topic,
-            "cards": [
-                {
-                    "id": f"{normalized_course}-{normalized_topic}-example-1",
-                    "title": f"{normalized_course} · {normalized_topic}",
-                    "stem": f"请完成一题与“{normalized_topic}”相关的练习。",
-                    "answer_type": "text",
-                    "difficulty": "medium",
-                }
-            ],
-        },
-    }
+from agent.memory import get_recent_messages
+from agent.providers import call_chat_once
+from database.models import ChoiceQuestionNode
+from repositories.vectorDB_repository import search_question_topK
 
 
-@tool
-def get_knowledge_graph(course_name: str, query_text: str = "") -> dict:
-    """
-    当用户明确要求查看知识图谱、关系图、概念网络，或希望从 Neo4j 中查询知识点之间的关系时调用。
+def _normalize_text(value: str) -> str:
+    return (value or "").strip()
 
-    需要提取的参数：
-    1. course_name：课程或学科名称，例如数据结构、离散数学、计算机网络。
-    2. query_text：用户真正想查询的知识点、主题或原始问题，例如二分查找、红黑树与AVL树的关系。
 
-    当用户仅需要文字解释时不要调用本工具。
-    当用户希望前端渲染可拖拽图谱组件时调用本工具。
-    返回值必须是 Generative UI 可以直接消费的 graph 字典结构。
-    """
-    from llm.retrievers import query_knowledge_graph
-
-    normalized_course = _normalize_course_name(course_name) or "通用"
-    graph_data = query_knowledge_graph(
-        query_text=(query_text or "").strip(),
-        course=normalized_course,
-        limit=20,
+def _build_user_brief(topic: str, chat_window_id: str, course_name: str) -> str:
+    current_topic = _normalize_text(topic)
+    recent_messages = get_recent_messages(chat_window_id, limit=6)
+    history_lines = []
+    for item in recent_messages:
+        role = "用户" if item.get("isUserSend") else "助手"
+        content = _normalize_text(item.get("content", ""))
+        if content:
+            history_lines.append(f"{role}: {content}")
+    history_text = "\n".join(history_lines).strip()
+    prompt = (
+        "你是学习需求提炼助手。请基于最近最多3轮对话和当前提问，"
+        "输出用户希望考察的知识点概述。"
+        "输出必须是单行中文，格式严格为“考察A、B、C”。"
+        "不要解释，不要换行，不要包含其他字段。"
     )
-    if graph_data.get("ok"):
-        return {
-            "ui_type": "graph",
-            "payload": {
-                "course": normalized_course,
-                "nodes": graph_data.get("nodes", []),
-                "edges": graph_data.get("edges", []),
-                "source": graph_data.get("source", "neo4j"),
-            },
-        }
+    user_message = (
+        f"课程：{_normalize_text(course_name)}\n"
+        f"最近对话：\n{history_text or '无'}\n"
+        f"当前提问：{current_topic or '无'}"
+    )
+    brief = call_chat_once(
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": user_message},
+        ],
+        model_level="lite",
+        temperature=0,
+        max_tokens=128,
+    )
+    clean_brief = _normalize_text(brief)
+    if clean_brief.startswith("考察"):
+        return clean_brief
+    if clean_brief:
+        return f"考察{clean_brief}"
+    fallback = current_topic or "课程核心知识点"
+    return f"考察{fallback}"
 
-    fallback_keyword = (query_text or "").strip() or "核心知识点"
+
+def _serialize_choice_question(question: ChoiceQuestionNode) -> dict:
     return {
-        "ui_type": "graph",
+        "id": question.id,
+        "course": question.course or "",
+        "content": question.content or "",
+        "optionA": question.optionA or "",
+        "optionB": question.optionB or "",
+        "optionC": question.optionC or "",
+        "optionD": question.optionD or "",
+        "answer": question.answer or "",
+        "brief": question.brief or "",
+        "explanation": question.explanation or "",
+        "difficulty": int(question.difficulty or 0),
+    }
+
+
+def _load_choice_questions_by_ids(question_ids: list[int]) -> list[dict]:
+    if not question_ids:
+        return []
+    unique_ids = []
+    seen = set()
+    for item in question_ids:
+        try:
+            current = int(item)
+        except Exception:
+            continue
+        if current in seen:
+            continue
+        seen.add(current)
+        unique_ids.append(current)
+    if not unique_ids:
+        return []
+    query_rows = ChoiceQuestionNode.query.filter(ChoiceQuestionNode.id.in_(unique_ids)).all()
+    row_mapping = {int(row.id): row for row in query_rows if getattr(row, "id", None) is not None}
+    output = []
+    for question_id in unique_ids:
+        row = row_mapping.get(question_id)
+        if row is None:
+            continue
+        output.append(_serialize_choice_question(row))
+    return output
+
+
+@tool
+def get_exercise_recommendation_card(
+    course_name: str,
+    topic: str = "",
+    chat_window_id: str = "",
+) -> dict:
+    """习题推荐卡片工具。"""
+    normalized_course = _normalize_text(course_name) or "通用课程"
+    user_brief = _build_user_brief(
+        topic=topic,
+        chat_window_id=_normalize_text(chat_window_id),
+        course_name=normalized_course,
+    )
+    top_ids = search_question_topK(
+        myBrief=user_brief,
+        course=normalized_course,
+        type="choice",
+        k=5,
+    )
+    questions = _load_choice_questions_by_ids(top_ids)
+    return {
+        "type": "questions",
+        "content": questions,
+        "userBrief": user_brief,
+        "card_title": "习题推荐",
+        "course": normalized_course,
+    }
+
+
+@tool
+def get_knowledge_graph_card(course_name: str, query_text: str = "") -> dict:
+    """知识图谱卡片占位工具。"""
+    normalized_course = _normalize_text(course_name) or "通用课程"
+    normalized_query = _normalize_text(query_text) or "核心知识点"
+    return {
+        "ui_type": "knowledge_graph_card",
         "payload": {
+            "brief_text": "已为你生成知识图谱卡片。",
             "course": normalized_course,
-            "nodes": [
-                {
-                    "id": "fallback-root",
-                    "label": fallback_keyword,
-                    "type": "concept",
-                }
-            ],
-            "edges": [],
-            "source": "mock",
-            "fallback_reason": graph_data.get("reason", "unknown"),
+            "query_text": normalized_query,
+            "card_title": "知识图谱",
+            "todo": "TODO: 接入知识图谱检索服务，并返回节点与关系数据。",
         },
     }
 
 
 @tool
-def get_page_navigation(target_page: str, course_name: str = "", target_id: str = "") -> dict:
-    """
-    当用户明确要求跳转到某个页面时调用，例如考试列表、考试详情、练习大厅、聊天页、设置页。
-
-    需要提取的参数：
-    1. target_page：目标页面语义，建议取值 exam_list、exam_detail、practice、chat、settings。
-    2. course_name：可选，若用户提到课程名称则提取出来，供前端后续做上下文展示。
-    3. target_id：可选，若用户明确指定考试或任务 ID 则提取出来。
-
-    当用户只是询问如何学习、如何解释知识点时不要调用本工具。
-    当用户的核心需求是页面跳转而不是知识问答时调用本工具。
-    返回值必须是 Generative UI 可以直接消费的 route_intent 字典结构。
-    """
-    normalized_page = (target_page or "").strip().lower()
-    normalized_course = _normalize_course_name(course_name)
-    normalized_target_id = (target_id or "").strip()
-    route_map = {
-        "exam_list": "/student/exam-list",
-        "exam_detail": "/student/exam-detail",
-        "practice": "/student/practice",
-        "chat": "/student/chat",
-        "settings": "/student/settings",
-    }
-    route = route_map.get(normalized_page, "/student/chat")
-    if normalized_page == "exam_detail" and normalized_target_id:
-        route = f"{route}?assignmentId={normalized_target_id}"
-
+def get_learning_review_card(course_name: str, user_id: str = "") -> dict:
+    """学情回顾卡片占位工具。"""
+    normalized_course = _normalize_text(course_name) or "通用课程"
+    normalized_user_id = _normalize_text(user_id)
     return {
-        "ui_type": "route_intent",
+        "ui_type": "learning_review_card",
         "payload": {
-            "route": route,
-            "target_page": normalized_page or "chat",
+            "brief_text": "已为你生成学情回顾卡片。",
             "course": normalized_course,
-            "target_id": normalized_target_id,
+            "user_id": normalized_user_id,
+            "card_title": "学情回顾",
+            "todo": "TODO: 接入学情分析服务，返回知识掌握度、薄弱点与学习建议。",
         },
     }
 
 
 TOOLS = [
-    get_example_card,
-    get_knowledge_graph,
-    get_page_navigation,
+    get_exercise_recommendation_card,
+    get_knowledge_graph_card,
+    get_learning_review_card,
 ]
