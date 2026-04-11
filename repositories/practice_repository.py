@@ -4,8 +4,8 @@ from database.models import (
     CustomQuestionNode,
     FillQuestionNode,
     QuestionNode,
-    QuestionSet,
-    QuestionSetQuestion,
+    StudentQuestionSet,
+    StudentQuestionSetQuestion,
     SubjectiveQuestionNode,
 )
 
@@ -184,27 +184,27 @@ def get_public_question_search_candidates(question_type: str, course: str) -> li
         return []
 
 
-def get_practice_sets_by_student(student_id: str) -> list[QuestionSet]:
+def get_practice_sets_by_student(student_id: str) -> list[StudentQuestionSet]:
     try:
         return (
-            QuestionSet.query.filter_by(teacher_id=student_id)
-            .order_by(QuestionSet.id.asc())
+            StudentQuestionSet.query.filter_by(student_id=student_id)
+            .order_by(StudentQuestionSet.id.asc())
             .all()
         )
     except Exception:
         return []
 
 
-def get_practice_set_by_id(set_id: int) -> QuestionSet | None:
+def get_practice_set_by_id(set_id: int) -> StudentQuestionSet | None:
     try:
-        return QuestionSet.query.filter_by(id=set_id).first()
+        return StudentQuestionSet.query.filter_by(id=set_id).first()
     except Exception:
         return None
 
 
-def create_practice_set(student_id: str, name: str) -> QuestionSet | None:
+def create_practice_set(student_id: str, name: str) -> StudentQuestionSet | None:
     try:
-        practice_set = QuestionSet(name=name, teacher_id=student_id)
+        practice_set = StudentQuestionSet(name=name, student_id=student_id)
         db.session.add(practice_set)
         db.session.commit()
         return practice_set
@@ -213,9 +213,9 @@ def create_practice_set(student_id: str, name: str) -> QuestionSet | None:
         return None
 
 
-def update_practice_set_name(set_id: int, name: str) -> QuestionSet | None:
+def update_practice_set_name(set_id: int, name: str) -> StudentQuestionSet | None:
     try:
-        practice_set = QuestionSet.query.filter_by(id=set_id).first()
+        practice_set = StudentQuestionSet.query.filter_by(id=set_id).first()
         if not practice_set:
             return None
         practice_set.name = name
@@ -228,8 +228,8 @@ def update_practice_set_name(set_id: int, name: str) -> QuestionSet | None:
 
 def delete_practice_set(set_id: int) -> bool:
     try:
-        QuestionSetQuestion.query.filter_by(set_id=set_id).delete()
-        deleted_count = QuestionSet.query.filter_by(id=set_id).delete()
+        StudentQuestionSetQuestion.query.filter_by(set_id=set_id).delete()
+        deleted_count = StudentQuestionSet.query.filter_by(id=set_id).delete()
         db.session.commit()
         return deleted_count > 0
     except Exception:
@@ -237,11 +237,11 @@ def delete_practice_set(set_id: int) -> bool:
         return False
 
 
-def get_practice_set_questions(set_id: int) -> list[QuestionSetQuestion]:
+def get_practice_set_questions(set_id: int) -> list[StudentQuestionSetQuestion]:
     try:
         return (
-            QuestionSetQuestion.query.filter_by(set_id=set_id)
-            .order_by(QuestionSetQuestion.order_num.asc(), QuestionSetQuestion.question_id.asc())
+            StudentQuestionSetQuestion.query.filter_by(set_id=set_id)
+            .order_by(StudentQuestionSetQuestion.order_num.asc(), StudentQuestionSetQuestion.question_id.asc())
             .all()
         )
     except Exception:
@@ -251,7 +251,7 @@ def get_practice_set_questions(set_id: int) -> list[QuestionSetQuestion]:
 def is_question_in_practice_set(set_id: int, question_id: int) -> bool:
     try:
         return (
-            QuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).first()
+            StudentQuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).first()
             is not None
         )
     except Exception:
@@ -261,11 +261,11 @@ def is_question_in_practice_set(set_id: int, question_id: int) -> bool:
 def add_question_to_practice_set(set_id: int, question_id: int) -> bool:
     try:
         max_order = (
-            db.session.query(db.func.max(QuestionSetQuestion.order_num))
+            db.session.query(db.func.max(StudentQuestionSetQuestion.order_num))
             .filter_by(set_id=set_id)
             .scalar()
         )
-        relation = QuestionSetQuestion(
+        relation = StudentQuestionSetQuestion(
             set_id=set_id,
             question_id=question_id,
             order_num=(max_order or 0) + 1,
@@ -281,7 +281,7 @@ def add_question_to_practice_set(set_id: int, question_id: int) -> bool:
 def remove_question_from_practice_set(set_id: int, question_id: int) -> bool:
     try:
         deleted_count = (
-            QuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).delete()
+            StudentQuestionSetQuestion.query.filter_by(set_id=set_id, question_id=question_id).delete()
         )
         db.session.commit()
         return deleted_count > 0

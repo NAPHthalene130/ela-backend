@@ -66,7 +66,20 @@ class CrourseNode(db.Model):
     course = db.Column(db.String(1024), primary_key=True)
 
 # 小组表
+class graphCourseNode(db.Model):
+    __tablename__ = "graphCourseNodeTable"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    course = db.Column(db.String(1024), nullable=False, index=True)
+    nodeName = db.Column(db.String(1024), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("course", "nodeName", name="uq_graph_course_node"),
+    )
+
+
 class StudentGroup(db.Model):
+    __tablename__ = "studentGroupTable"
     __tablename__ = "studentGroupTable"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -205,6 +218,36 @@ class QuestionSetQuestion(db.Model):
     order_num = db.Column(db.Integer, nullable=False, default=0)
 
 
+# 学生练习题单表
+class StudentQuestionSet(db.Model):
+    __tablename__ = "studentQuestionSetTable"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(1024), nullable=False)
+    student_id = db.Column(
+        db.String(50),
+        db.ForeignKey("usersTable.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+
+# 学生练习题单题目关联表
+class StudentQuestionSetQuestion(db.Model):
+    __tablename__ = "studentQuestionSetQuestionTable"
+
+    set_id = db.Column(
+        db.Integer,
+        db.ForeignKey("studentQuestionSetTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    question_id = db.Column(
+        db.Integer,
+        db.ForeignKey("questionTable.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    order_num = db.Column(db.Integer, nullable=False, default=0)
+
+
 # 题单下发表
 class QuestionSetAssignment(db.Model):
     __tablename__ = "questionSetAssignmentTable"
@@ -297,6 +340,7 @@ def init_all_tables(app):
         db.create_all()
         ensure_user_type_schema()
         ensure_question_schema()
+        ensure_student_practice_schema()
         ensure_assignment_schema()
         ensure_student_answer_schema()
         ensure_chat_card_schema()
@@ -440,6 +484,53 @@ def ensure_question_schema():
                 )
             )
             db.session.commit()
+
+
+def ensure_student_practice_schema():
+    inspector = inspect(db.engine)
+    table_names = set(inspector.get_table_names())
+    if "studentQuestionSetTable" not in table_names:
+        return
+    if "studentQuestionSetQuestionTable" not in table_names:
+        return
+    if "questionSetTable" not in table_names or "questionSetQuestionTable" not in table_names:
+        return
+    if "usersTable" not in table_names:
+        return
+
+    db.session.execute(
+        text(
+            """
+            INSERT INTO studentQuestionSetTable (id, name, student_id)
+            SELECT qs.id, qs.name, qs.teacher_id
+            FROM questionSetTable qs
+            INNER JOIN usersTable u ON u.id = qs.teacher_id
+            WHERE LOWER(COALESCE(u.type, '')) = 'student'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM studentQuestionSetTable sqs
+                WHERE sqs.id = qs.id
+              )
+            """
+        )
+    )
+    db.session.execute(
+        text(
+            """
+            INSERT INTO studentQuestionSetQuestionTable (set_id, question_id, order_num)
+            SELECT qsq.set_id, qsq.question_id, COALESCE(qsq.order_num, 0)
+            FROM questionSetQuestionTable qsq
+            INNER JOIN studentQuestionSetTable sqs ON sqs.id = qsq.set_id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM studentQuestionSetQuestionTable sqq
+                WHERE sqq.set_id = qsq.set_id
+                  AND sqq.question_id = qsq.question_id
+            )
+            """
+        )
+    )
+    db.session.commit()
 
 
 def ensure_assignment_schema():

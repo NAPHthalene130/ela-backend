@@ -321,7 +321,7 @@ def create_student_practice_set(student_id: str, name: str) -> tuple[dict | None
 
 def delete_student_practice_set(student_id: str, set_id: int) -> tuple[bool, int, str]:
     practice_set = get_practice_set_by_id(set_id)
-    if not practice_set or practice_set.teacher_id != student_id:
+    if not practice_set or practice_set.student_id != student_id:
         return False, 404, "Practice set not found"
     if not delete_practice_set(set_id):
         return False, 500, "Delete practice set failed"
@@ -334,7 +334,7 @@ def add_question_into_student_practice_set(
     question_id: int,
 ) -> tuple[dict | None, int, str]:
     practice_set = get_practice_set_by_id(set_id)
-    if not practice_set or practice_set.teacher_id != student_id:
+    if not practice_set or practice_set.student_id != student_id:
         return None, 404, "Practice set not found"
     question_detail = get_practice_question_detail(question_id)
     if not question_detail:
@@ -353,7 +353,7 @@ def remove_question_from_student_practice_set(
     question_id: int,
 ) -> tuple[dict | None, int, str]:
     practice_set = get_practice_set_by_id(set_id)
-    if not practice_set or practice_set.teacher_id != student_id:
+    if not practice_set or practice_set.student_id != student_id:
         return None, 404, "Practice set not found"
     if not remove_question_from_practice_set(set_id, question_id):
         return None, 404, "Question not found in practice set"
@@ -363,7 +363,7 @@ def remove_question_from_student_practice_set(
 
 def get_student_practice_session(student_id: str, set_id: int) -> tuple[dict | None, int, str]:
     practice_set = get_practice_set_by_id(set_id)
-    if not practice_set or practice_set.teacher_id != student_id:
+    if not practice_set or practice_set.student_id != student_id:
         return None, 404, "Practice set not found"
     question_rows = get_practice_set_questions(set_id)
     questions: list[dict] = []
