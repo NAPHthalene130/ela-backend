@@ -140,7 +140,10 @@ def add_question(id: int, brief: str, course: str, type: str) -> bool:
     try:
         clean_course = _normalize_course(course)
         clean_type = _normalize_type(type)
-        print(f"尝试添加:ID: {id} BREIF: {brief} COURSE: {course} TYPE: {type}")
+        try:
+            print(f"尝试添加:ID: {id} BREIF: {brief} COURSE: {course} TYPE: {type}".encode('utf-8', 'ignore').decode('utf-8', 'ignore'))
+        except Exception:
+            pass
         vector_db = get_question_brief_vector_db()
         embedding = _get_embedding_vector(brief or "")
         vector_db.upsert(
@@ -151,15 +154,17 @@ def add_question(id: int, brief: str, course: str, type: str) -> bool:
             brief_vector=embedding,
         )
 
-        print(
-            "UPSERTED: id: {}, course: {}, brief: {}, type: {}, vector: {}".format(
-                id,
-                clean_course,
-                brief,
-                clean_type,
-                embedding,
+        try:
+            print(
+                "UPSERTED: id: {}, course: {}, brief: {}, type: {}".format(
+                    id,
+                    clean_course,
+                    brief,
+                    clean_type,
+                ).encode('utf-8', 'ignore').decode('utf-8', 'ignore')
             )
-        )
+        except Exception:
+            pass
         return True
     except Exception:
         print(traceback.format_exc())
@@ -173,6 +178,30 @@ def delete_question(id: int) -> bool:
         return True
     except Exception:
         return False
+
+
+def filter_existing_question_ids(question_ids: list[int]) -> list[int]:
+    unique_ids: list[int] = []
+    seen: set[int] = set()
+    for item in question_ids or []:
+        try:
+            question_id = int(item)
+        except Exception:
+            continue
+        if question_id <= 0 or question_id in seen:
+            continue
+        seen.add(question_id)
+        unique_ids.append(question_id)
+    if not unique_ids:
+        return []
+    try:
+        vector_db = get_question_brief_vector_db()
+        result = vector_db.collection.get(ids=[str(item) for item in unique_ids], include=[])
+        rows = result.get("ids") if isinstance(result, dict) else []
+        existing_ids = {int(item) for item in rows or []}
+        return [item for item in unique_ids if item in existing_ids]
+    except Exception:
+        return []
 
 
 def _extract_hit_id(hit: Any) -> int | None:
@@ -215,6 +244,8 @@ def search_question_topK(myBrief: str, course: str, type: str, k: int) -> list[i
             if item_id is not None:
                 ids.append(item_id)
         return ids
-    except Exception:
+    except Exception as error:
+        if "缺少Embedding模型配置" in str(error):
+            return []
         print(traceback.format_exc())
         return []
