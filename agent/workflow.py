@@ -224,6 +224,28 @@ def _resolve_tool_result(
     return None, None
 
 
+def _persist_feature_card(chat_window_id: str, result: dict) -> None:
+    if not chat_window_id or not isinstance(result, dict):
+        return
+    card_type = str(result.get("type", "") or result.get("ui_type", "")).strip()
+    card_content = result.get("content")
+    if card_type not in ("questions", "graph") or not isinstance(card_content, list):
+        return
+    payload = {
+        "title": str(result.get("card_title", "") or "").strip(),
+        "type": card_type,
+        "content": card_content,
+        "summary": str(result.get("summary", "") or result.get("brief_text", "") or "").strip(),
+        "course": str(result.get("course", "") or "").strip(),
+    }
+    if card_type == "questions":
+        payload["summary"] = str(result.get("userBrief", "") or payload["summary"]).strip()
+    if card_type == "graph":
+        payload["focus_node"] = str(result.get("focus_node", "") or "").strip()
+        payload["query_text"] = str(result.get("query_text", "") or "").strip()
+    add_card(chat_window_id, json.dumps(payload, ensure_ascii=False))
+
+
 def run_agentic_stream(msg: str, user_id: str = "", chat_window_id: str = "", course: str = ""):
     clean_msg = (msg or "").strip()
     if not clean_msg:
@@ -254,14 +276,7 @@ def run_agentic_stream(msg: str, user_id: str = "", chat_window_id: str = "", co
         if not need_tool:
             return
         mode, result = _resolve_tool_result(intent, user_id, chat_window_id)
-        if (
-            mode == "exercise_recommendation"
-            and isinstance(result, dict)
-            and result.get("type") == "questions"
-        ):
-            card_content = result.get("content")
-            if isinstance(card_content, list):
-                add_card(chat_window_id, json.dumps(card_content, ensure_ascii=False))
+        _persist_feature_card(chat_window_id, result if isinstance(result, dict) else {})
         if mode and isinstance(result, dict):
             yield from generate_json_packet(mode, result)
             return

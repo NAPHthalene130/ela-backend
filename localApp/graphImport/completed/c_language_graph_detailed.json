@@ -1,0 +1,1118 @@
+[
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "数据类型",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "控制结构",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "运算符与表达式",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "基本数据类型",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "构造数据类型",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "指针类型",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "空类型(void)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "基本数据类型",
+    "node2": "整型(int)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "基本数据类型",
+    "node2": "浮点型(float, double)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "基本数据类型",
+    "node2": "字符型(char)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "构造数据类型",
+    "node2": "数组",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "构造数据类型",
+    "node2": "结构体(struct)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "构造数据类型",
+    "node2": "共用体(union)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "构造数据类型",
+    "node2": "枚举(enum)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "顺序结构",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "选择结构",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "循环结构",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "选择结构",
+    "node2": "if语句",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "选择结构",
+    "node2": "switch语句",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "循环结构",
+    "node2": "for循环",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "循环结构",
+    "node2": "while循环",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "循环结构",
+    "node2": "do-while循环",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "变量",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "控制结构",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "函数",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "函数声明与定义",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "参数传递",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "参数传递",
+    "node2": "值传递",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "参数传递",
+    "node2": "地址传递",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "地址传递",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "一维数组",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "多维数组",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "字符数组与字符串",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "指针变量",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "指针与数组",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "指针与函数",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "二级指针",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与数组",
+    "node2": "数组指针",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与数组",
+    "node2": "指针数组",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "链表基础",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "链表基础",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "预处理指令",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "预处理指令",
+    "node2": "宏定义(#define)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "预处理指令",
+    "node2": "文件包含(#include)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "文件操作",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "文件指针",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "顺序读写",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "随机读写",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "标识符命名规则",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "关键字(32个)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "标识符命名规则",
+    "node2": "大小写敏感",
+    "relation": "特征"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "整型(int)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "整型(int)",
+    "node2": "short int",
+    "relation": "变体"
+  },
+  {
+    "course": "C语言",
+    "node1": "整型(int)",
+    "node2": "long int",
+    "relation": "变体"
+  },
+  {
+    "course": "C语言",
+    "node1": "整型(int)",
+    "node2": "long long int",
+    "relation": "变体(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "整型(int)",
+    "node2": "有符号与无符号(signed/unsigned)",
+    "relation": "修饰"
+  },
+  {
+    "course": "C语言",
+    "node1": "有符号与无符号(signed/unsigned)",
+    "node2": "整数溢出(Integer Overflow)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "浮点型(float, double)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "浮点型(float, double)",
+    "node2": "long double",
+    "relation": "变体"
+  },
+  {
+    "course": "C语言",
+    "node1": "浮点型(float, double)",
+    "node2": "IEEE 754标准",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "浮点型(float, double)",
+    "node2": "精度丢失问题",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "字符型(char)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符型(char)",
+    "node2": "ASCII码表",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符型(char)",
+    "node2": "转义字符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "转义字符",
+    "node2": "\\0 (空字符)",
+    "relation": "特殊"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "布尔类型(_Bool/stdbool.h)",
+    "relation": "变体(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "数据类型",
+    "node2": "类型转换",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "类型转换",
+    "node2": "隐式类型转换(自动转换)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "类型转换",
+    "node2": "显式类型转换(强制转换)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "隐式类型转换(自动转换)",
+    "node2": "整型提升(Integer Promotion)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "隐式类型转换(自动转换)",
+    "node2": "寻常算术转换(Usual Arithmetic Conversions)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "变量",
+    "node2": "作用域",
+    "relation": "属性"
+  },
+  {
+    "course": "C语言",
+    "node1": "作用域",
+    "node2": "局部变量",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "作用域",
+    "node2": "全局变量",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "作用域",
+    "node2": "块作用域",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "变量",
+    "node2": "生命周期",
+    "relation": "属性"
+  },
+  {
+    "course": "C语言",
+    "node1": "变量",
+    "node2": "存储类别(Storage Class)",
+    "relation": "属性"
+  },
+  {
+    "course": "C语言",
+    "node1": "存储类别(Storage Class)",
+    "node2": "auto",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "存储类别(Storage Class)",
+    "node2": "register",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "存储类别(Storage Class)",
+    "node2": "static",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "存储类别(Storage Class)",
+    "node2": "extern",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "static",
+    "node2": "静态局部变量",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "static",
+    "node2": "静态全局变量",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "static",
+    "node2": "静态函数",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "static",
+    "node2": "限制链接属性(内部链接)",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "算术运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "关系运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "逻辑运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "逻辑运算符",
+    "node2": "短路求值(Short-circuit evaluation)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "位运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "位运算符",
+    "node2": "按位与(&), 或(|), 异或(^), 取反(~)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "位运算符",
+    "node2": "左移(<<), 右移(>>)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "左移(<<), 右移(>>)",
+    "node2": "算术右移与逻辑右移",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "赋值运算符(=, +=, etc.)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "赋值运算符(=, +=, etc.)",
+    "node2": "左值与右值(L-value & R-value)",
+    "relation": "前置知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "条件运算符(?:)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "逗号运算符(,)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "逗号运算符(,)",
+    "node2": "结合性与返回值",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "sizeof运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "sizeof运算符",
+    "node2": "编译期求值",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "sizeof运算符",
+    "node2": "sizeof与数组/指针的区别",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "运算符与表达式",
+    "node2": "优先级与结合性",
+    "relation": "规则"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "悬挂else问题(Dangling else)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "switch语句",
+    "node2": "case穿透(Fall-through)",
+    "relation": "特征/易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "switch语句",
+    "node2": "default子句位置",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "循环结构",
+    "node2": "break语句",
+    "relation": "控制转移"
+  },
+  {
+    "course": "C语言",
+    "node1": "循环结构",
+    "node2": "continue语句",
+    "relation": "控制转移"
+  },
+  {
+    "course": "C语言",
+    "node1": "控制结构",
+    "node2": "goto语句",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "goto语句",
+    "node2": "深层嵌套循环跳出",
+    "relation": "应用场景"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "数组初始化",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组初始化",
+    "node2": "指定初始化器(Designated Initializers)",
+    "relation": "变体(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "数组越界(Out of bounds)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "数组",
+    "node2": "变长数组(VLA)",
+    "relation": "变体(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "多维数组",
+    "node2": "内存连续分布",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符数组与字符串",
+    "node2": "字符串常量(String Literals)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符串常量(String Literals)",
+    "node2": "只读内存区段(.rodata)",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符数组与字符串",
+    "node2": "字符串处理函数(<string.h>)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符串处理函数(<string.h>)",
+    "node2": "strlen, strcpy, strcat, strcmp",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符串处理函数(<string.h>)",
+    "node2": "strncpy, strncat, strncmp (安全版本)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符串处理函数(<string.h>)",
+    "node2": "strtok (字符串分割)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "字符串处理函数(<string.h>)",
+    "node2": "sprintf, sscanf",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "空指针(NULL)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "空指针(NULL)",
+    "node2": "野指针(Wild Pointer)与悬空指针(Dangling Pointer)",
+    "relation": "易混淆/易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "void指针(泛型指针)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "指针运算(加减、比较)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针运算(加减、比较)",
+    "node2": "指针减法与ptrdiff_t",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与数组",
+    "node2": "数组名退化为指针(Decay)",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与数组",
+    "node2": "a[i]与*(a+i)的等价性",
+    "relation": "核心机制"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与数组",
+    "node2": "指向多维数组的指针(行指针)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针与函数",
+    "node2": "函数指针(Function Pointer)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数指针(Function Pointer)",
+    "node2": "回调函数(Callback)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数指针(Function Pointer)",
+    "node2": "函数指针数组(转移表)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "const修饰指针",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "const修饰指针",
+    "node2": "常量指针(const int *p)",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "const修饰指针",
+    "node2": "指针常量(int * const p)",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "指针类型",
+    "node2": "restrict关键字",
+    "relation": "犄角旮旯(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "函数原型(Function Prototype)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "递归函数",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "递归函数",
+    "node2": "基线条件与递归步",
+    "relation": "核心机制"
+  },
+  {
+    "course": "C语言",
+    "node1": "递归函数",
+    "node2": "栈溢出(Stack Overflow)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "递归函数",
+    "node2": "尾递归优化",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "内联函数(inline)",
+    "relation": "变体(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "函数",
+    "node2": "可变参数函数(<stdarg.h>)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "C语言",
+    "node1": "可变参数函数(<stdarg.h>)",
+    "node2": "va_list, va_start, va_arg, va_end",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "结构体定义与初始化",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "结构体嵌套",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "结构体指针",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体指针",
+    "node2": "-> 运算符",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "内存对齐(Memory Alignment)",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "内存对齐(Memory Alignment)",
+    "node2": "#pragma pack",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "位域(Bit-fields)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "位域(Bit-fields)",
+    "node2": "端序问题(Endianness)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "结构体(struct)",
+    "node2": "柔性数组(Flexible Array Member)",
+    "relation": "犄角旮旯(C99)"
+  },
+  {
+    "course": "C语言",
+    "node1": "共用体(union)",
+    "node2": "内存共享机制",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "共用体(union)",
+    "node2": "判断大小端(Endianness)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "枚举(enum)",
+    "node2": "枚举常量的默认值",
+    "relation": "规则"
+  },
+  {
+    "course": "C语言",
+    "node1": "构造数据类型",
+    "node2": "typedef(类型别名)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "typedef(类型别名)",
+    "node2": "与#define的区别",
+    "relation": "易混淆"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "动态内存管理(<stdlib.h>)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "动态内存管理(<stdlib.h>)",
+    "node2": "malloc",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "动态内存管理(<stdlib.h>)",
+    "node2": "calloc",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "动态内存管理(<stdlib.h>)",
+    "node2": "realloc",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "动态内存管理(<stdlib.h>)",
+    "node2": "free",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "free",
+    "node2": "内存泄漏(Memory Leak)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "free",
+    "node2": "重复释放(Double Free)",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "预处理指令",
+    "node2": "条件编译",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "条件编译",
+    "node2": "#ifdef, #ifndef, #endif",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "条件编译",
+    "node2": "防止头文件重复包含(Include Guards)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "C语言",
+    "node1": "宏定义(#define)",
+    "node2": "带参数的宏",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "带参数的宏",
+    "node2": "宏的副作用(如MAX(i++, j++))",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "带参数的宏",
+    "node2": "# 与 ## 运算符(字符串化与标记粘贴)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "C语言",
+    "node1": "预处理指令",
+    "node2": "#pragma指令",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "预处理指令",
+    "node2": "预定义宏(__FILE__, __LINE__, etc.)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "C语言基础",
+    "node2": "C程序编译过程",
+    "relation": "底层原理"
+  },
+  {
+    "course": "C语言",
+    "node1": "C程序编译过程",
+    "node2": "预处理(Preprocessing) -> 编译(Compilation) -> 汇编(Assembly) -> 链接(Linking)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "文本文件与二进制文件",
+    "relation": "概念"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "文件打开与关闭(fopen, fclose)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件打开与关闭(fopen, fclose)",
+    "node2": "文件打开模式(r, w, a, r+, wb, etc.)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "顺序读写",
+    "node2": "字符读写(fgetc, fputc)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "顺序读写",
+    "node2": "字符串读写(fgets, fputs)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "顺序读写",
+    "node2": "格式化读写(fscanf, fprintf)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "顺序读写",
+    "node2": "数据块读写(fread, fwrite)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "随机读写",
+    "node2": "fseek, ftell, rewind",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "文件结束检测(feof)",
+    "relation": "包含"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件结束检测(feof)",
+    "node2": "feof的滞后性",
+    "relation": "易错点"
+  },
+  {
+    "course": "C语言",
+    "node1": "文件操作",
+    "node2": "标准流(stdin, stdout, stderr)",
+    "relation": "概念"
+  }
+]

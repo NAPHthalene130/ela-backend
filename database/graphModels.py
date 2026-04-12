@@ -27,3 +27,9 @@ class KuzuRelationSchema:
     from_table = "Node"
     to_table = "Node"
     columns = ("course", "relation")
+
+class GraphNode:
+    course: str
+    node1: str
+    node2: str
+    relation: str

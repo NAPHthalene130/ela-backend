@@ -12,6 +12,7 @@ from repositories.chat_repository import (
 from repositories.course_repository import get_course_list
 from repositories.cq_repository import add_cq_node, update_cq_node
 from repositories.group_repository import get_group_info_from_studentGroupTable
+from repositories.graph_repository import get_relation, import_relation
 from repositories.student_exam_repository import (
     get_assignments_for_student,
     get_exam_paper_details,
@@ -34,6 +35,8 @@ __all__ = [
     "is_window_owned_by_user",
     "get_course_list",
     "get_group_info_from_studentGroupTable",
+    "import_relation",
+    "get_relation",
     "add_cq_node",
     "update_cq_node",
     "get_assignments_for_student",
