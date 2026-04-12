@@ -51,6 +51,8 @@ def _extract_assistant_text(payload: dict) -> str:
         return ""
     if result.get("type") == "questions":
         return "已为你推荐5道习题，请在右侧功能卡片查看并作答。"
+    if result.get("type") == "graph":
+        return str(result.get("brief_text", "") or result.get("summary", "") or "已为你生成知识图谱功能卡片。").strip()
     ui_type = str(result.get("ui_type", "") or "").strip()
     if ui_type:
         body = result.get("payload") or {}
@@ -75,23 +77,48 @@ def _parse_card_json(raw_json: str):
         parsed = json.loads(text)
     except Exception:
         return []
-    return parsed if isinstance(parsed, list) else []
+    if isinstance(parsed, list):
+        return {
+            "type": "questions",
+            "title": "习题推荐",
+            "summary": "点击开始作答",
+            "content": parsed,
+        }
+    if isinstance(parsed, dict):
+        return parsed
+    return {}
 
 
 def get_history_by_window(window_id: str) -> dict:
     cards = get_card_list(window_id)
-    return {
-        "messages": get_chat_history(window_id),
-        "featureCards": [
+    feature_cards = []
+    for card in cards:
+        parsed = _parse_card_json(card.json)
+        card_type = str(parsed.get("type", "") or "").strip() if isinstance(parsed, dict) else ""
+        card_title = str(parsed.get("title", "") or "").strip() if isinstance(parsed, dict) else ""
+        card_summary = str(parsed.get("summary", "") or "").strip() if isinstance(parsed, dict) else ""
+        card_content = parsed.get("content") if isinstance(parsed, dict) else []
+        if not card_type:
+            card_type = "questions"
+        if not card_title:
+            card_title = "习题推荐" if card_type == "questions" else "知识图谱"
+        if not card_summary:
+            card_summary = "点击查看详情"
+        feature_cards.append(
             {
                 "id": card.id,
-                "title": "习题推荐",
-                "type": "questions",
-                "content": _parse_card_json(card.json),
+                "title": card_title,
+                "type": card_type,
+                "content": card_content if isinstance(card_content, list) else [],
+                "summary": card_summary,
+                "focus_node": str(parsed.get("focus_node", "") or "").strip() if isinstance(parsed, dict) else "",
+                "query_text": str(parsed.get("query_text", "") or "").strip() if isinstance(parsed, dict) else "",
                 "no": card.no,
             }
-            for card in cards
-        ],
+        )
+    return {
+        "messages": get_chat_history(window_id),
+        "featureCards": feature_cards,
     }
 
 

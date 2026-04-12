@@ -116,6 +116,31 @@ def normalize_question_item(item: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
+def infer_source_course(file_path: Path) -> str:
+    text = normalize_text(file_path.stem)
+    if not text:
+        return ""
+    if any(keyword in text for keyword in ("数据结构", "链表", "栈", "队列", "树", "图", "串")):
+        return "数据结构"
+    if any(keyword in text for keyword in ("C语言", "程序设计", "语法", "指针")):
+        return "C语言"
+    return ""
+
+
+def infer_source_type(item: dict[str, Any]) -> str:
+    normalized_type = normalize_text(item.get("type")).lower()
+    if normalized_type:
+        return normalized_type
+    options = item.get("options")
+    if isinstance(options, list) and options:
+        return "choice"
+    if any(normalize_text(item.get(key)) for key in ("optionA", "optionB", "optionC", "optionD")):
+        return "choice"
+    if normalize_text(item.get("imageURL")):
+        return "custom"
+    return ""
+
+
 def format_question_with_lite(
     item: dict[str, Any], format_prompt_template: str
 ) -> dict[str, Any]:
@@ -190,6 +215,10 @@ def process_question_pipeline(
     solved = solve_with_pro(with_brief, solve_prompt_template)
     log_question(trace, "Pro解答", "完成")
     normalized = normalize_question_item(solved)
+    if not normalize_text(normalized.get("course")) and normalize_text(source_course):
+        normalized["course"] = clamp_text(source_course, 1024)
+    if not normalize_text(normalized.get("type")) and normalize_text(source_type):
+        normalized["type"] = normalize_text(source_type).lower()
     log_question(trace, "数据库导入", "开始")
     question_id = import_question_item(normalized)
     if question_id is None:
@@ -425,8 +454,8 @@ def run_import() -> dict[str, int]:
                     brief_prompt_template,
                     solve_prompt_template,
                     trace,
-                    normalize_text(item.get("course")),
-                    normalize_text(item.get("type")).lower(),
+                    normalize_text(item.get("course")) or infer_source_course(json_file),
+                    infer_source_type(item),
                 )
                 future_map[future] = (json_file, index, item)
         for future in as_completed(future_map):

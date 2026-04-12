@@ -112,10 +112,8 @@ def create_langchain_chat_model(
     reasoning_kwargs = {}
     if enable_reasoning:
         reasoning_kwargs = {
-            "model_kwargs": {
-                "extra_body": {
-                    "thinking": {"type": "enabled"},
-                }
+            "extra_body": {
+                "thinking": {"type": "enabled"},
             }
         }
     constructor_candidates = [

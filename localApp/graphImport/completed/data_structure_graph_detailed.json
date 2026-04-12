@@ -1,0 +1,836 @@
+[
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "基本概念",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "算法分析",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "时间复杂度",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "空间复杂度",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "线性结构",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "非线性结构",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性结构",
+    "node2": "线性表",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性表",
+    "node2": "顺序表",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性表",
+    "node2": "链表",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "链表",
+    "node2": "单链表",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "链表",
+    "node2": "双向链表",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "链表",
+    "node2": "循环链表",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性结构",
+    "node2": "栈(Stack)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "顺序栈",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "链栈",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性结构",
+    "node2": "队列(Queue)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "顺序队列",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "循环队列",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "链队列",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "表达式求值",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "递归调用",
+    "relation": "底层原理"
+  },
+  {
+    "course": "数据结构",
+    "node1": "非线性结构",
+    "node2": "树(Tree)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "二叉树",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "满二叉树",
+    "relation": "特殊形态"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "完全二叉树",
+    "relation": "特殊形态"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "二叉搜索树(BST)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉搜索树(BST)",
+    "node2": "平衡二叉树(AVL)",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "树的遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树的遍历",
+    "node2": "前序遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树的遍历",
+    "node2": "中序遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树的遍历",
+    "node2": "后序遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树的遍历",
+    "node2": "层序遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "层序遍历",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "前序遍历/中序/后序(非递归)",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "哈夫曼树(Huffman)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "非线性结构",
+    "node2": "图(Graph)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "有向图/无向图",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "图的存储",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的存储",
+    "node2": "邻接矩阵",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的存储",
+    "node2": "邻接表",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "图的遍历",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的遍历",
+    "node2": "深度优先搜索(DFS)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的遍历",
+    "node2": "广度优先搜索(BFS)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "深度优先搜索(DFS)",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "广度优先搜索(BFS)",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "最小生成树",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "最短路径",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "拓扑排序",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "查找算法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "顺序查找",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "二分查找",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "哈希表(Hash)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "数据结构基础",
+    "node2": "排序算法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "冒泡排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "插入排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "选择排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "快速排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "归并排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "堆排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "最好/最坏/平均时间复杂度",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "摊还分析(Amortized Analysis)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "大O渐进表示法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "大O渐进表示法",
+    "node2": "常数阶、对数阶、线性阶等",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "算法分析",
+    "node2": "递归树与主定理(Master Theorem)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "顺序表",
+    "node2": "动态扩容机制",
+    "relation": "底层原理"
+  },
+  {
+    "course": "数据结构",
+    "node1": "单链表",
+    "node2": "头插法与尾插法",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "单链表",
+    "node2": "哨兵节点(Dummy Node)",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "单链表",
+    "node2": "快慢指针(找中点/判环)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "链表",
+    "node2": "跳表(Skip List)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "跳表(Skip List)",
+    "node2": "Redis ZSet底层实现",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线性表",
+    "node2": "静态链表",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "顺序栈",
+    "node2": "共享栈(两个栈共享空间)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "表达式求值",
+    "node2": "中缀表达式转后缀表达式(逆波兰)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "栈(Stack)",
+    "node2": "单调栈",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "循环队列",
+    "node2": "队空与队满的判断条件(牺牲一个单元)",
+    "relation": "易错点"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "双端队列(Deque)",
+    "relation": "变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "双端队列(Deque)",
+    "node2": "单调队列(滑动窗口最大值)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "队列(Queue)",
+    "node2": "优先队列(Priority Queue)",
+    "relation": "变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "优先队列(Priority Queue)",
+    "node2": "堆(Heap)",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "树的度、节点深度、高度",
+    "relation": "属性"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "二叉树的性质(如n0 = n2 + 1)",
+    "relation": "规则"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树的遍历",
+    "node2": "Morris遍历(空间复杂度O(1))",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉树",
+    "node2": "线索二叉树(Threaded Binary Tree)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "线索二叉树(Threaded Binary Tree)",
+    "node2": "利用空指针域指向前驱/后继",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "树、森林与二叉树的转换",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树、森林与二叉树的转换",
+    "node2": "左孩子右兄弟表示法",
+    "relation": "实现方式"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈夫曼树(Huffman)",
+    "node2": "带权路径长度(WPL)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈夫曼树(Huffman)",
+    "node2": "前缀编码(哈夫曼编码)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉搜索树(BST)",
+    "node2": "删除节点(寻找后继节点替换)",
+    "relation": "易错点"
+  },
+  {
+    "course": "数据结构",
+    "node1": "平衡二叉树(AVL)",
+    "node2": "LL/RR/LR/RL旋转",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "二叉搜索树(BST)",
+    "node2": "红黑树(Red-Black Tree)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "红黑树(Red-Black Tree)",
+    "node2": "黑高(Black Height)平衡",
+    "relation": "底层原理"
+  },
+  {
+    "course": "数据结构",
+    "node1": "红黑树(Red-Black Tree)",
+    "node2": "C++ STL map/set底层",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "B树与B+树",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "B树与B+树",
+    "node2": "数据库索引(MySQL)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "Trie树(字典树)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "树(Tree)",
+    "node2": "并查集(Disjoint Set)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "并查集(Disjoint Set)",
+    "node2": "路径压缩与按秩合并",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "顶点的度、入度、出度",
+    "relation": "属性"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "连通图与强连通分量",
+    "relation": "概念"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的存储",
+    "node2": "十字链表(有向图)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图的存储",
+    "node2": "邻接多重表(无向图)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "欧拉回路与哈密顿回路",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "二分图(Bipartite Graph)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最小生成树",
+    "node2": "Prim算法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最小生成树",
+    "node2": "Kruskal算法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "Kruskal算法",
+    "node2": "并查集(Disjoint Set)",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最短路径",
+    "node2": "Dijkstra算法(单源)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最短路径",
+    "node2": "Bellman-Ford算法(单源含负权)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最短路径",
+    "node2": "Floyd-Warshall算法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "最短路径",
+    "node2": "SPFA算法(任意两点)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "图(Graph)",
+    "node2": "关键路径(AOE网)",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "关键路径(AOE网)",
+    "node2": "最早/最晚发生时间",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "拓扑排序",
+    "node2": "AOV网",
+    "relation": "前置知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "顺序查找",
+    "node2": "哨兵机制(避免越界检查)",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "分块查找(索引顺序查找)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "插值查找(Interpolation Search)",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "查找算法",
+    "node2": "斐波那契查找",
+    "relation": "犄角旮旯"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希表(Hash)",
+    "node2": "哈希函数构造方法",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希函数构造方法",
+    "node2": "直接定址、除留余数、平方取中等",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希表(Hash)",
+    "node2": "哈希冲突处理(Collision Resolution)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希冲突处理(Collision Resolution)",
+    "node2": "开放定址法(线性/二次探测)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希冲突处理(Collision Resolution)",
+    "node2": "拉链法(链地址法)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希表(Hash)",
+    "node2": "装填因子(Load Factor)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "哈希表(Hash)",
+    "node2": "布隆过滤器(Bloom Filter)",
+    "relation": "进阶知识"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "稳定性(Stability)",
+    "relation": "属性"
+  },
+  {
+    "course": "数据结构",
+    "node1": "插入排序",
+    "node2": "希尔排序(Shell Sort)",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "快速排序",
+    "node2": "枢轴(Pivot)选择与划分(Partition)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "快速排序",
+    "node2": "三数取中、随机化枢轴",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "快速排序",
+    "node2": "小区间改用插入排序",
+    "relation": "优化变体"
+  },
+  {
+    "course": "数据结构",
+    "node1": "快速排序",
+    "node2": "最坏情况退化为O(n^2)",
+    "relation": "易错点"
+  },
+  {
+    "course": "数据结构",
+    "node1": "堆排序",
+    "node2": "建堆(向下调整法/筛选法)",
+    "relation": "核心机制"
+  },
+  {
+    "course": "数据结构",
+    "node1": "堆排序",
+    "node2": "Top K问题",
+    "relation": "核心应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "排序算法",
+    "node2": "非比较排序",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "非比较排序",
+    "node2": "计数排序(Counting Sort)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "非比较排序",
+    "node2": "桶排序(Bucket Sort)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "非比较排序",
+    "node2": "基数排序(Radix Sort)",
+    "relation": "包含"
+  },
+  {
+    "course": "数据结构",
+    "node1": "归并排序",
+    "node2": "外部排序(多路归并)",
+    "relation": "进阶应用"
+  },
+  {
+    "course": "数据结构",
+    "node1": "外部排序(多路归并)",
+    "node2": "败者树(Tree of Losers)",
+    "relation": "犄角旮旯"
+  }
+]
