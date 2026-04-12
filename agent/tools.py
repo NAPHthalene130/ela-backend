@@ -11,12 +11,18 @@ from agent.memory import get_recent_messages
 from agent.providers import call_chat_once
 from core.extensions import db
 from database.models import ChoiceQuestionNode, graphCourseNode
+from repositories.answer_repository import get_answer_history
 from repositories.graph_repository import get_course_node_names, get_relation, resolve_course_name
 from repositories.vectorDB_repository import search_question_topK
 
 
-def _normalize_text(value: str) -> str:
-    return (value or "").strip()
+def _normalize_text(value) -> str:
+    if value is None:
+        return ""
+    try:
+        return str(value).strip()
+    except Exception:
+        return ""
 
 
 def _build_user_brief(topic: str, chat_window_id: str, course_name: str) -> str:
@@ -240,6 +246,262 @@ def _rank_candidate_nodes(query_text: str, focused_node: str, candidate_nodes: l
     return ordered
 
 
+def _to_date_text(value) -> str:
+    if value is None:
+        return ""
+    if hasattr(value, "isoformat"):
+        try:
+            return str(value.isoformat())
+        except Exception:
+            return str(value)
+    return str(value)
+
+
+def _safe_ratio(value: float) -> float:
+    try:
+        return round(float(value), 4)
+    except Exception:
+        return 0.0
+
+
+def _serialize_answer_records(rows) -> list[dict]:
+    output = []
+    for item in rows or []:
+        brief = _normalize_text(getattr(item, "questionBrief", "") or "未命名题目")
+        date_text = _to_date_text(getattr(item, "date", ""))
+        output.append(
+            {
+                "brief": brief or "未命名题目",
+                "isCorrect": bool(getattr(item, "isCorrect", False)),
+                "date": date_text,
+            }
+        )
+    return output
+
+
+def _build_daily_trend(entries: list[dict], limit: int = 14) -> list[dict]:
+    grouped = {}
+    for item in entries:
+        day = _normalize_text(item.get("date", ""))
+        if not day:
+            continue
+        current = grouped.setdefault(day, {"date": day, "total": 0, "correct": 0})
+        current["total"] += 1
+        if item.get("isCorrect"):
+            current["correct"] += 1
+    trend = []
+    for day in sorted(grouped.keys()):
+        row = grouped[day]
+        total = int(row["total"])
+        correct = int(row["correct"])
+        trend.append(
+            {
+                "date": day,
+                "total": total,
+                "correct": correct,
+                "accuracy": _safe_ratio(correct / total) if total else 0.0,
+            }
+        )
+    if len(trend) <= limit:
+        return trend
+    return trend[-limit:]
+
+
+def _build_brief_stats(entries: list[dict], limit: int = 6) -> tuple[list[dict], list[dict]]:
+    grouped = {}
+    for item in entries:
+        brief = _normalize_text(item.get("brief", "")) or "未命名题目"
+        row = grouped.setdefault(brief, {"brief": brief, "attempts": 0, "correct": 0})
+        row["attempts"] += 1
+        if item.get("isCorrect"):
+            row["correct"] += 1
+    stats = []
+    for row in grouped.values():
+        attempts = int(row["attempts"])
+        correct = int(row["correct"])
+        stats.append(
+            {
+                "brief": row["brief"],
+                "attempts": attempts,
+                "correct": correct,
+                "accuracy": _safe_ratio(correct / attempts) if attempts else 0.0,
+            }
+        )
+    if not stats:
+        return [], []
+    weak_pool = [item for item in stats if item["attempts"] >= 2] or stats
+    strong_pool = [item for item in stats if item["attempts"] >= 2] or stats
+    weak_items = sorted(
+        weak_pool,
+        key=lambda item: (item["accuracy"], -item["attempts"], item["brief"]),
+    )[:limit]
+    strong_items = sorted(
+        strong_pool,
+        key=lambda item: (-item["accuracy"], -item["attempts"], item["brief"]),
+    )[:limit]
+    return weak_items, strong_items
+
+
+def _parse_json_block(raw_text: str) -> dict:
+    content = _normalize_text(raw_text)
+    if not content:
+        return {}
+    try:
+        parsed = json.loads(content)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        pass
+    start_index = content.find("{")
+    end_index = content.rfind("}")
+    if start_index == -1 or end_index == -1 or end_index <= start_index:
+        return {}
+    try:
+        parsed = json.loads(content[start_index : end_index + 1])
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def _build_fallback_insights(
+    weak_items: list[dict],
+    strong_items: list[dict],
+    overall_accuracy: float,
+) -> dict:
+    weak_names = [item.get("brief", "") for item in weak_items[:3] if item.get("brief")]
+    strong_names = [item.get("brief", "") for item in strong_items[:3] if item.get("brief")]
+    weak_text = "、".join(weak_names) if weak_names else "暂无明显弱势项"
+    strong_text = "、".join(strong_names) if strong_names else "暂无明显强势项"
+    return {
+        "weak_items": [
+            f"{weak_text}的正确率相对偏低，建议先回归课本定义与典型例题。",
+        ],
+        "strong_items": [
+            f"{strong_text}保持稳定，建议继续通过变式题巩固。",
+        ],
+        "learning_suggestions": [
+            "每次练习后优先复盘错题，定位是概念遗漏还是审题失误。",
+            "将同类题集中练习并记录纠错要点，隔天进行二次回测。",
+            "先保正确率再提速度，单次训练建议控制在20分钟内。",
+        ],
+        "overall_summary": f"最近作答整体正确率约为{round(overall_accuracy * 100, 1)}%，建议按“弱项优先、强项保持”的节奏推进。",
+    }
+
+
+def _build_empty_insights() -> dict:
+    return {
+        "weak_items": ["暂无可分析的弱势项，先完成若干道练习题。"],
+        "strong_items": ["暂无可分析的强势项，完成更多作答后会自动识别。"],
+        "learning_suggestions": [
+            "建议先完成同一课程下的基础题与中档题，形成可分析样本。",
+            "每次练习后查看错因并记录，连续两天复测同类题。",
+            "先稳定正确率，再逐步压缩作答时间。",
+        ],
+        "overall_summary": "当前未检索到有效作答记录，暂无法形成可靠学情画像。",
+    }
+
+
+def _filter_rows_by_course(rows, course_name: str, limit: int = 100):
+    target = _normalize_text(course_name)
+    if not target:
+        return list(rows or [])[:limit], ""
+    lower_target = target.lower()
+    output = []
+    for row in rows or []:
+        row_course = _normalize_text(getattr(row, "course", ""))
+        lower_row = row_course.lower()
+        if lower_row == lower_target or lower_target in lower_row or lower_row in lower_target:
+            output.append(row)
+            if len(output) >= limit:
+                break
+    return output, target
+
+
+def _fetch_learning_review_rows(user_id: str, course_name: str, limit: int = 100):
+    normalized_user_id = _normalize_text(user_id)
+    normalized_course = _normalize_text(course_name)
+    if not normalized_user_id:
+        return [], normalized_course
+    if not normalized_course or normalized_course == "$ALL$":
+        return [], normalized_course
+    direct_rows = get_answer_history(normalized_user_id, normalized_course, limit)
+    if direct_rows:
+        return direct_rows, normalized_course
+    all_rows = get_answer_history(normalized_user_id, "$ALL$", max(limit * 4, 400))
+    if not all_rows:
+        return [], normalized_course
+    filtered_rows, _ = _filter_rows_by_course(all_rows, normalized_course, limit=limit)
+    if filtered_rows:
+        return filtered_rows, normalized_course
+    course_names = list(
+        dict.fromkeys(
+            _normalize_text(getattr(item, "course", ""))
+            for item in all_rows
+            if _normalize_text(getattr(item, "course", ""))
+        )
+    )
+    if not course_names:
+        return [], normalized_course
+    matched = difflib.get_close_matches(normalized_course, course_names, n=1, cutoff=0.45)
+    if matched:
+        fuzzy_rows, _ = _filter_rows_by_course(all_rows, matched[0], limit=limit)
+        if fuzzy_rows:
+            return fuzzy_rows, matched[0]
+    return [], normalized_course
+
+
+def _build_llm_learning_insights(course_name: str, entries: list[dict], fallback: dict) -> dict:
+    if not entries:
+        return fallback
+    compact_lines = [
+        f"[{item.get('brief', '')}][{'true' if item.get('isCorrect') else 'false'}][{item.get('date', '')}]"
+        for item in entries
+    ]
+    prompt = (
+        "你是资深学习分析师。"
+        "请只基于给定作答记录，输出严格JSON，不要输出任何额外文本。"
+        "JSON结构："
+        '{"weak_items":[""],"strong_items":[""],"learning_suggestions":[""],"overall_summary":""}。'
+        "要求："
+        "1) weak_items、strong_items、learning_suggestions 各返回3-5条中文短句；"
+        "2) 结论要具体、可执行，不要空泛；"
+        "3) 不要编造不存在的数据。"
+    )
+    user_message = (
+        f"课程：{course_name}\n"
+        "作答记录如下，每条格式为[brief][isCorrect][Date]：\n"
+        + "\n".join(compact_lines)
+    )
+    raw = call_chat_once(
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": user_message},
+        ],
+        model_level="pro",
+        temperature=0,
+        max_tokens=900,
+    )
+    parsed = _parse_json_block(raw)
+    weak_items = parsed.get("weak_items")
+    strong_items = parsed.get("strong_items")
+    suggestions = parsed.get("learning_suggestions")
+    summary = _normalize_text(parsed.get("overall_summary", ""))
+    if not isinstance(weak_items, list) or not isinstance(strong_items, list) or not isinstance(suggestions, list):
+        return fallback
+    clean_weak = [_normalize_text(item) for item in weak_items if _normalize_text(str(item))]
+    clean_strong = [_normalize_text(item) for item in strong_items if _normalize_text(str(item))]
+    clean_suggestions = [_normalize_text(item) for item in suggestions if _normalize_text(str(item))]
+    if not clean_weak or not clean_strong or not clean_suggestions:
+        return fallback
+    if not summary:
+        summary = fallback.get("overall_summary", "")
+    return {
+        "weak_items": clean_weak[:5],
+        "strong_items": clean_strong[:5],
+        "learning_suggestions": clean_suggestions[:5],
+        "overall_summary": summary,
+    }
+
+
 @tool
 def get_exercise_recommendation_card(
     course_name: str,
@@ -303,18 +565,54 @@ def get_knowledge_graph_card(course_name: str, query_text: str = "") -> dict:
 
 @tool
 def get_learning_review_card(course_name: str, user_id: str = "") -> dict:
-    """学情回顾卡片占位工具。"""
-    normalized_course = _normalize_text(course_name) or "通用课程"
+    """学情回顾卡片工具。"""
+    normalized_course = _normalize_text(course_name) or "$ALL$"
     normalized_user_id = _normalize_text(user_id)
+    answer_rows, matched_course = _fetch_learning_review_rows(
+        user_id=normalized_user_id,
+        course_name=normalized_course,
+        limit=100,
+    )
+    entries = _serialize_answer_records(answer_rows)
+    total_count = len(entries)
+    correct_count = sum(1 for item in entries if item.get("isCorrect"))
+    accuracy = _safe_ratio(correct_count / total_count) if total_count else 0.0
+    trend = _build_daily_trend(entries, limit=14)
+    weak_stats, strong_stats = _build_brief_stats(entries, limit=6)
+    fallback_insights = (
+        _build_fallback_insights(weak_stats, strong_stats, accuracy)
+        if total_count
+        else _build_empty_insights()
+    )
+    analysis_course = matched_course or (normalized_course if normalized_course != "$ALL$" else "")
+    insights = _build_llm_learning_insights(analysis_course, entries, fallback_insights)
+    if not normalized_course or normalized_course == "$ALL$":
+        summary = "请先指定学科后再进行学情回顾分析。"
+    elif total_count:
+        summary = f"近{total_count}题正确率{round(accuracy * 100, 1)}%，已提炼弱势项{len(weak_stats)}个、强势项{len(strong_stats)}个。"
+    else:
+        summary = f"未检索到「{analysis_course or normalized_course}」相关作答记录，可先完成该学科练习后再生成学情回顾。"
+    overview = {
+        "total": total_count,
+        "correct": correct_count,
+        "wrong": max(total_count - correct_count, 0),
+        "accuracy": accuracy,
+    }
+    content = {
+        "overview": overview,
+        "trend": trend,
+        "weak_stats": weak_stats,
+        "strong_stats": strong_stats,
+        "insights": insights,
+        "samples": entries[-24:],
+    }
     return {
-        "ui_type": "learning_review_card",
-        "payload": {
-            "brief_text": "已为你生成学情回顾卡片。",
-            "course": normalized_course,
-            "user_id": normalized_user_id,
-            "card_title": "学情回顾",
-            "todo": "TODO: 接入学情分析服务，返回知识掌握度、薄弱点与学习建议。",
-        },
+        "type": "analysis",
+        "content": content,
+        "summary": summary,
+        "brief_text": summary,
+        "course": matched_course or (normalized_course if normalized_course != "$ALL$" else ""),
+        "card_title": "学情回顾",
     }
 
 

@@ -53,6 +53,8 @@ def _extract_assistant_text(payload: dict) -> str:
         return "已为你推荐5道习题，请在右侧功能卡片查看并作答。"
     if result.get("type") == "graph":
         return str(result.get("brief_text", "") or result.get("summary", "") or "已为你生成知识图谱功能卡片。").strip()
+    if result.get("type") == "analysis":
+        return str(result.get("brief_text", "") or result.get("summary", "") or "已为你生成学情回顾功能卡片。").strip()
     ui_type = str(result.get("ui_type", "") or "").strip()
     if ui_type:
         body = result.get("payload") or {}
@@ -101,15 +103,24 @@ def get_history_by_window(window_id: str) -> dict:
         if not card_type:
             card_type = "questions"
         if not card_title:
-            card_title = "习题推荐" if card_type == "questions" else "知识图谱"
+            card_title = (
+                "习题推荐"
+                if card_type == "questions"
+                else ("知识图谱" if card_type == "graph" else "学情回顾")
+            )
         if not card_summary:
             card_summary = "点击查看详情"
+        normalized_content = []
+        if card_type in ("questions", "graph"):
+            normalized_content = card_content if isinstance(card_content, list) else []
+        if card_type == "analysis":
+            normalized_content = card_content if isinstance(card_content, dict) else {}
         feature_cards.append(
             {
                 "id": card.id,
                 "title": card_title,
                 "type": card_type,
-                "content": card_content if isinstance(card_content, list) else [],
+                "content": normalized_content,
                 "summary": card_summary,
                 "focus_node": str(parsed.get("focus_node", "") or "").strip() if isinstance(parsed, dict) else "",
                 "query_text": str(parsed.get("query_text", "") or "").strip() if isinstance(parsed, dict) else "",

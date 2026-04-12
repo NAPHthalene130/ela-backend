@@ -229,7 +229,12 @@ def _persist_feature_card(chat_window_id: str, result: dict) -> None:
         return
     card_type = str(result.get("type", "") or result.get("ui_type", "")).strip()
     card_content = result.get("content")
-    if card_type not in ("questions", "graph") or not isinstance(card_content, list):
+    valid_type = card_type in ("questions", "graph", "analysis")
+    valid_content = (
+        (card_type in ("questions", "graph") and isinstance(card_content, list))
+        or (card_type == "analysis" and isinstance(card_content, dict))
+    )
+    if not valid_type or not valid_content:
         return
     payload = {
         "title": str(result.get("card_title", "") or "").strip(),
@@ -243,6 +248,8 @@ def _persist_feature_card(chat_window_id: str, result: dict) -> None:
     if card_type == "graph":
         payload["focus_node"] = str(result.get("focus_node", "") or "").strip()
         payload["query_text"] = str(result.get("query_text", "") or "").strip()
+    if card_type == "analysis":
+        payload["summary"] = str(result.get("summary", "") or result.get("brief_text", "") or payload["summary"]).strip()
     add_card(chat_window_id, json.dumps(payload, ensure_ascii=False))
 
 
