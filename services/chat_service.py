@@ -5,9 +5,11 @@ from repositories.chat_repository import (
     create_chat_window,
     delete_user_chat_window,
     get_chat_history,
+    get_window_message_count,
     get_window_history,
     is_window_owned_by_user,
     save_chat_message,
+    update_chat_window_title,
 )
 from repositories.answer_repository import add_answer_history
 from repositories.card_repository import get_card_list
@@ -61,6 +63,24 @@ def _extract_assistant_text(payload: dict) -> str:
         if isinstance(body, dict):
             return str(body.get("brief_text", "") or "").strip()
     return ""
+
+
+def _build_auto_title_from_question(message: str) -> str:
+    text = str(message or "").strip()
+    if not text:
+        return "新对话"
+    compact = " ".join(text.replace("\r", " ").replace("\n", " ").split())
+    for prefix in ("请问", "帮我", "请帮我", "我想", "请", "如何", "怎么"):
+        if compact.startswith(prefix) and len(compact) > len(prefix):
+            compact = compact[len(prefix) :].strip()
+            break
+    compact = compact.strip("，。！？；：,.!?;:()[]{}\"' ")
+    if not compact:
+        return "新对话"
+    max_length = 20
+    if len(compact) > max_length:
+        compact = compact[:max_length].rstrip()
+    return compact
 
 
 def get_course_list() -> list[str]:
@@ -157,6 +177,8 @@ def add_answer_history_for_user(user_id: str, question_id: int, is_correct: bool
 
 def stream_chat_response(user_id: str, chat_window_id: str, message: str, course: str = ""):
     """执行流式聊天并在流结束后落库完整回复。"""
+    if get_window_message_count(chat_window_id) == 0:
+        update_chat_window_title(chat_window_id, _build_auto_title_from_question(message))
     save_chat_message(chat_window_id, message, True)
 
     def generate():
