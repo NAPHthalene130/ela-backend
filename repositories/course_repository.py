@@ -27,3 +27,38 @@ def get_course_list_by_fallback_sql() -> list[str]:
         return [row[0] for row in rows if row and row[0]]
     except Exception:
         return []
+
+
+def ensure_course_exists(course: str) -> bool:
+    course_name = (course or "").strip()
+    if not course_name:
+        return False
+    try:
+        existing = CrourseNode.query.filter_by(course=course_name).first()
+        if existing:
+            return True
+        db.session.add(CrourseNode(course=course_name))
+        db.session.commit()
+        return True
+    except Exception:
+        db.session.rollback()
+    try:
+        columns = {column["name"] for column in inspect(db.engine).get_columns("courseTable")}
+        target_column = "course" if "course" in columns else "courseName" if "courseName" in columns else None
+        if not target_column:
+            return False
+        existing = db.session.execute(
+            text(f'SELECT 1 FROM "courseTable" WHERE "{target_column}" = :course LIMIT 1'),
+            {"course": course_name},
+        ).first()
+        if existing:
+            return True
+        db.session.execute(
+            text(f'INSERT INTO "courseTable" ("{target_column}") VALUES (:course)'),
+            {"course": course_name},
+        )
+        db.session.commit()
+        return True
+    except Exception:
+        db.session.rollback()
+        return False

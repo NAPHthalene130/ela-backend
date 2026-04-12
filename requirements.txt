@@ -4,3 +4,7 @@ Flask-SQLAlchemy
 Flask-JWT-Extended
 redis
 openai
+langchain
+langchain-openai
+chromadb
+kuzu

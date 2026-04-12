@@ -5,3 +5,6 @@ project_config.py
 project.db
 instance/
 localApp/questionProcess/cqFiles/*
+localApp/questionImport/uncompleted/*
+localApp/questionImport/completed/*
+ 

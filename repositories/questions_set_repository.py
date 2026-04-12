@@ -23,6 +23,7 @@ def add_choice_question(
     belong_id: str = "$PUBLIC$",
     answer: str = "",
     brief: str = "",
+    explanation: str = "",
 ) -> int | None:
     question_node = QuestionNode(type="choice", course=course, belongID=belong_id)
     choice_question = ChoiceQuestionNode(
@@ -34,6 +35,7 @@ def add_choice_question(
         optionD=optionD,
         answer=answer,
         brief=brief,
+        explanation=explanation,
         belongID=belong_id,
     )
     try:
@@ -54,6 +56,7 @@ def add_fill_question(
     belong_id: str = "$PUBLIC$",
     answer: str = "",
     brief: str = "",
+    explanation: str = "",
 ) -> int | None:
     question_node = QuestionNode(type="fill", course=course, belongID=belong_id)
     fill_question = FillQuestionNode(
@@ -61,6 +64,7 @@ def add_fill_question(
         content=content,
         answer=answer,
         brief=brief,
+        explanation=explanation,
         belongID=belong_id,
     )
     try:
@@ -81,6 +85,7 @@ def add_subjective_question(
     belong_id: str = "$PUBLIC$",
     answer: str = "",
     brief: str = "",
+    explanation: str = "",
 ) -> int | None:
     question_node = QuestionNode(type="subjective", course=course, belongID=belong_id)
     subjective_question = SubjectiveQuestionNode(
@@ -88,6 +93,7 @@ def add_subjective_question(
         content=content,
         answer=answer,
         brief=brief,
+        explanation=explanation,
         belongID=belong_id,
     )
     try:

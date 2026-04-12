@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from database.models import UserChatWindowTable, WindowChatNode
+from database.models import ChatCardNode, UserChatWindowTable, WindowChatNode
 
 
 def create_chat_window(user_id: str) -> str | None:
@@ -73,7 +73,7 @@ def get_window_history(user_id: str) -> list[dict]:
     try:
         windows = (
             UserChatWindowTable.query.filter_by(id=user_id)
-            .order_by(UserChatWindowTable.createTime.asc())
+            .order_by(UserChatWindowTable.createTime.desc())
             .all()
         )
         return [
@@ -89,11 +89,41 @@ def get_window_history(user_id: str) -> list[dict]:
         return []
 
 
+def update_chat_window_title(window_id: str, title: str) -> bool:
+    from core.extensions import db
+
+    normalized_window_id = str(window_id or "").strip()
+    normalized_title = str(title or "").strip()
+    if not normalized_window_id or not normalized_title:
+        return False
+    target = UserChatWindowTable.query.filter_by(windowsId=normalized_window_id).first()
+    if target is None:
+        return False
+    target.title = normalized_title
+    try:
+        db.session.commit()
+        return True
+    except Exception:
+        db.session.rollback()
+        return False
+
+
+def get_window_message_count(window_id: str) -> int:
+    normalized_window_id = str(window_id or "").strip()
+    if not normalized_window_id:
+        return 0
+    try:
+        return WindowChatNode.query.filter_by(windowID=normalized_window_id).count()
+    except Exception:
+        return 0
+
+
 def delete_user_chat_window(window_id: str) -> bool:
     from core.extensions import db
 
     try:
         WindowChatNode.query.filter_by(windowID=window_id).delete()
+        ChatCardNode.query.filter_by(windowsID=window_id).delete()
         UserChatWindowTable.query.filter_by(windowsId=window_id).delete()
         db.session.commit()
         return True

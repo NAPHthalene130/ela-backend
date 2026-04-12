@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from core.responses import fail_response, success_response
 from services.chat_service import (
+    add_answer_history_for_user,
     create_window_for_user,
     delete_window_for_user,
     get_course_list,
@@ -73,14 +74,23 @@ def chat_stream():
     """流式聊天接口：边生成边返回文本。"""
     data = request.get_json(silent=True) or {}
     window_id = data.get("windowID")
-    content = data.get("content")
+    # 兼容新旧前端字段：优先读取 msg（Agent 入参），其次回退到 content
+    content = data.get("msg") or data.get("content")
     course = data.get("course")
     current_user_id = get_jwt_identity()
     if not window_id or not content:
         return fail_response("Missing parameters", 400)
 
     generator = stream_chat_response(current_user_id, window_id, content, course)
-    return Response(stream_with_context(generator), mimetype="text/plain")
+    return Response(
+        stream_with_context(generator),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @chat_bp.post("/delete-window")
@@ -97,3 +107,21 @@ def delete_window():
     if not success:
         return fail_response(message, status_code)
     return success_response(msg=message)
+
+
+@chat_bp.post("/answer-history")
+@jwt_required()
+def add_answer_history_record():
+    data = request.get_json(silent=True) or {}
+    current_user_id = get_jwt_identity()
+    user_id = str(data.get("userID") or current_user_id or "").strip()
+    question_id = data.get("questionID")
+    is_correct = data.get("isCorrect")
+    if question_id is None or is_correct is None:
+        return fail_response("Missing parameters", 400)
+    if user_id != current_user_id:
+        return fail_response("User mismatch", 403)
+    saved = add_answer_history_for_user(user_id, question_id, bool(is_correct))
+    if saved is None:
+        return fail_response("Failed to add answer history", 500)
+    return success_response(msg="Answer history saved")
